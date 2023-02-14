@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{64550A00-2EAD-4CF8-81FB-404E599F5515}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TomekDexValheimMod</RootNamespace>
+    <AssemblyName>ContainerQuickDistribution</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>D:\Steam\steamapps\common\Valheim\mod\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="assembly_utils">
+      <HintPath>D:\Steam\steamapps\common\Valheim\valheim_Data\Managed\assembly_utils.dll</HintPath>
+    </Reference>
+    <Reference Include="assembly_valheim_publicized, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Steam\steamapps\common\Valheim\valheim_Data\Managed\publicized_assemblies\assembly_valheim_publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>D:\Steam\steamapps\common\Valheim\mod\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>D:\Steam\steamapps\common\Valheim\mod\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>D:\Steam\steamapps\common\Valheim\mod\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>D:\Steam\steamapps\common\Valheim\valheim_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ContainerQuickDistributionInicializer.cs" />
+    <Compile Include="ContainerQuickDistributionObject.cs" />
+    <Compile Include="Controllers\ItemDropController.cs" />
+    <Compile Include="Controllers\EggGrowController.cs" />
+    <Compile Include="Controllers\ProcreationController.cs" />
+    <Compile Include="Controllers\PickableController.cs" />
+    <Compile Include="Controllers\MonsterAIController.cs" />
+    <Compile Include="Controllers\CookingStationController .cs" />
+    <Compile Include="Controllers\SapCollectorController.cs" />
+    <Compile Include="Controllers\SmelterController.cs" />
+    <Compile Include="Controllers\FireplaceController.cs" />
+    <Compile Include="Controllers\FermenterController.cs" />
+    <Compile Include="Controllers\BeehiveController.cs" />
+    <Compile Include="Controllers\TurretController.cs" />
+    <Compile Include="ContainerQuickDistribution.cs" />
+    <Compile Include="ItemHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ContainerQuickAccess\ContainerQuickAccess.csproj">
+      <Project>{cac22ca6-8815-4977-b415-9746d9e6d25d}</Project>
+      <Name>ContainerQuickAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TomekDexValheimModHelper\TomekDexValheimModHelper.csproj">
+      <Project>{bb767e70-bd56-4512-a8e1-4034ffe3b4ce}</Project>
+      <Name>TomekDexValheimModHelper</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

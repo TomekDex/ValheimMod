@@ -1,4 +1,5 @@
-﻿namespace TomekDexValheimMod.Controllers
+﻿
+namespace TomekDexValheimMod.Controllers
 {
     public class ItemDropController : ContainerQuickDistributionObject<ItemDrop>
     {

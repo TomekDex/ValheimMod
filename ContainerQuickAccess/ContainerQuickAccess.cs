@@ -15,77 +15,24 @@ namespace TomekDexValheimMod
         private static readonly Dictionary<(Vector3, Vector3), float> distance = new Dictionary<(Vector3, Vector3), float>();
         private static readonly ContainerIdDistanceComparer containerIdDistanceComparer = new ContainerIdDistanceComparer();
 
-        public static int TryRemoveItemNearbyContainer(Vector3 position, int workingArea, ItemDrop itemDrop, int ammound)
+        #region TryRemoveItem
+        public static int TryRemoveItemRegistertNearbyContainer(Vector3 position, int workingArea, ItemDrop itemDrop, int ammound)
         {
             if (ContainerQuickAccessConfig.Logs)
                 Debug.Log($"TryRemoveItemNearbyContainer {position} {workingArea} {itemDrop.name} {ammound}");
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
             int removed = 0;
-            foreach (ContainerIdDistance cId in GetNearbyContainerWithItem(position, workingArea, itemDrop))
+            foreach (ContainerIdDistance cId in GetRegistertNearbyContainerWithItem(position, workingArea, itemDrop))
             {
                 foreach (ItemDrop.ItemData item in TryRemoveItem(cId.Container.m_inventory, itemDrop, ammound - removed))
-                {
-                    Debug.Log($"{item.m_stack}");
                     removed += item.m_stack;
-                }
                 if (ammound - removed == 0)
                     break;
             }
             sw.Stop();
             if (ContainerQuickAccessConfig.Logs)
-                Debug.Log($"TryRemoveItemNearbyContainer {removed} {sw.Elapsed}");
+                Debug.Log($"TryRemoveItemNearbyContainer {removed}/{ammound} {sw.Elapsed}");
             return removed;
-        }
-
-        public static bool TryAddItemNearbyContainers(Vector3 position, int workingArea, ItemDrop item)
-        {
-            if (ContainerQuickAccessConfig.Logs)
-                Debug.Log($"TryAddItemNearbyContainers {position} {workingArea} {item.name} {item.m_itemData.m_stack}");
-            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-            foreach (ContainerIdDistance cId in GetRegistertNearbyContainer(position, workingArea))
-            {
-                Debug.Log($"{cId.Container.name} {GetDistance((position, cId.Container.transform.position))}");
-
-                if (TryAddItem(cId.Container.m_inventory, item))
-                {
-                    sw.Stop();
-                    if (ContainerQuickAccessConfig.Logs)
-                        Debug.Log($"TryAddItemNearbyContainers true {item.m_itemData.m_stack} {sw.Elapsed}");
-                    return true;
-                }
-            }
-            sw.Stop();
-            if (ContainerQuickAccessConfig.Logs)
-                Debug.Log($"TryAddItemNearbyContainers false {item.m_itemData.m_stack} {sw.Elapsed}");
-            return false;
-        }
-
-        public static bool IsAnyRegistertNearbyContainer(Vector3 position, int workingArea)
-        {
-            if (!vectorRadiusId.ContainsKey((position, workingArea)))
-                if (!RegistertNearbyContainer(position, workingArea))
-                    return false;
-            return vectorRadiusId[(position, workingArea)].Any();
-        }
-
-        private static bool TryAddItem(Inventory inventory, ItemDrop item)
-        {
-            if (item.m_itemData.m_stack <= 0)
-                return true;
-            while (item.m_itemData.m_stack > item.m_itemData.m_shared.m_maxStackSize)
-            {
-                ItemDrop itemNew = UnityEngine.Object.Instantiate(item);
-                itemNew.m_itemData.m_stack = itemNew.m_itemData.m_shared.m_maxStackSize;
-                item.m_itemData.m_stack -= itemNew.m_itemData.m_shared.m_maxStackSize;
-                if (!inventory.AddItem(itemNew.m_itemData))
-                {
-                    item.m_itemData.m_stack += itemNew.m_itemData.m_stack;
-                    return false;
-                }
-            }
-            if (!inventory.AddItem(item.m_itemData))
-                return false;
-            return true;
         }
 
         public static IEnumerable<ItemDrop.ItemData> TryRemoveItem(Inventory inventory, ItemDrop item, int amount)
@@ -94,7 +41,7 @@ namespace TomekDexValheimMod
                 Debug.Log($"TryRemoveItem {amount} {item.name}");
             foreach (ItemDrop.ItemData itemIn in inventory.m_inventory.ToList())
             {
-                if (itemIn.m_shared.m_name == item.m_itemData.m_shared.m_name)
+                if (itemIn.m_shared.m_name == item.m_itemData.m_shared.m_name && itemIn.m_quality == item.m_itemData.m_quality)
                 {
                     if (amount >= itemIn.m_stack)
                     {
@@ -105,7 +52,7 @@ namespace TomekDexValheimMod
                     else
                     {
                         itemIn.m_stack -= amount;
-                        ItemDrop newItem = UnityEngine.Object.Instantiate(item);
+                        ItemDrop newItem = Object.Instantiate(item);
                         newItem.m_itemData.m_stack = amount;
                         yield return newItem.m_itemData;
                         break;
@@ -155,7 +102,50 @@ namespace TomekDexValheimMod
             }
             return removed;
         }
+        #endregion TryRemoveItem
 
+        #region TryAddItem
+        public static bool TryAddItemNearbyContainers(Vector3 position, int workingArea, ItemDrop item)
+        {
+            if (ContainerQuickAccessConfig.Logs)
+                Debug.Log($"TryAddItemNearbyContainers {position} {workingArea} {item.name} {item.m_itemData.m_stack}");
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+            foreach (ContainerIdDistance cId in GetRegistertNearbyContainer(position, workingArea))
+                if (TryAddItem(cId.Container.m_inventory, item))
+                {
+                    sw.Stop();
+                    if (ContainerQuickAccessConfig.Logs)
+                        Debug.Log($"TryAddItemNearbyContainers true {item.m_itemData.m_stack} {item.name} {sw.Elapsed}");
+                    return true;
+                }
+            sw.Stop();
+            if (ContainerQuickAccessConfig.Logs)
+                Debug.Log($"TryAddItemNearbyContainers false {item.m_itemData.m_stack} {sw.Elapsed}");
+            return false;
+        }
+
+        private static bool TryAddItem(Inventory inventory, ItemDrop item)
+        {
+            if (item.m_itemData.m_stack <= 0)
+                return true;
+            while (item.m_itemData.m_stack > item.m_itemData.m_shared.m_maxStackSize)
+            {
+                ItemDrop itemNew = UnityEngine.Object.Instantiate(item);
+                itemNew.m_itemData.m_stack = itemNew.m_itemData.m_shared.m_maxStackSize;
+                item.m_itemData.m_stack -= itemNew.m_itemData.m_shared.m_maxStackSize;
+                if (!inventory.AddItem(itemNew.m_itemData))
+                {
+                    item.m_itemData.m_stack += itemNew.m_itemData.m_stack;
+                    return false;
+                }
+            }
+            if (!inventory.AddItem(item.m_itemData))
+                return false;
+            return true;
+        }
+        #endregion TryAddItem
+
+        #region CountItems
         public static int CountItems(Vector3 position, int workingArea, ItemDrop item)
         {
             IEnumerable<ContainerIdDistance> contaniers = GetNearbyContainer(position, workingArea);
@@ -177,32 +167,9 @@ namespace TomekDexValheimMod
                 Debug.Log($"Count items {sum} {item.m_itemData.m_shared.m_name}");
             return sum;
         }
+        #endregion CountItems
 
-        public static bool RegistertNearbyContainer(Vector3 position, int workingArea)
-        {
-            if (ContainerQuickAccessConfig.UseCheckAccess && Player.m_localPlayer == null)
-                return false;
-            if (!vectorRadiusId.ContainsKey((position, workingArea)))
-                vectorRadiusId[(position, workingArea)] = new SortedSet<ContainerIdDistance>(containerIdDistanceComparer);
-            foreach (ContainerIdDistance cId in GetNearbyContainer(position, workingArea))
-                RegistertNearbyContainer(position, workingArea, cId);
-            return true;
-        }
-
-        public static void UnRegistertNearbyContainer(Vector3 position, int workingArea)
-        {
-            if (!vectorRadiusId.TryGetValue((position, workingArea), out SortedSet<ContainerIdDistance> cIds))
-                return;
-            foreach (ContainerIdDistance cId in cIds)
-                if (idVectorRadius.TryGetValue(cId, out HashSet<(Vector3 vector, int radius)> radiusVector))
-                {
-                    radiusVector.Remove((position, workingArea));
-                    if (!radiusVector.Any())
-                        idVectorRadius.Remove(cId);
-                }
-            vectorRadiusId.Remove((position, workingArea));
-        }
-
+        #region GetContainer
         public static IEnumerable<ContainerIdDistance> GetRegistertNearbyContainer(Vector3 position, int workingArea)
         {
             if (ContainerQuickAccessConfig.Logs)
@@ -229,19 +196,6 @@ namespace TomekDexValheimMod
             }
         }
 
-        public static IEnumerable<ContainerIdDistance> GetRegistertNearbyContainerWithItem(Vector3 position, int workingArea, IEnumerable<ItemDrop> item)
-        {
-            HashSet<ContainerIdDistance> cids = item
-                .Where(a => itemsIdCount.ContainsKey(a.m_itemData.m_shared.m_name))
-                .Select(a => itemsIdCount[a.m_itemData.m_shared.m_name])
-                .SelectMany(a => a.Keys)
-                .ToHashSet();
-            if (cids.Any())
-                foreach (ContainerIdDistance cId in GetRegistertNearbyContainer(position, workingArea))
-                    if (cids.Contains(cId))
-                        yield return cId;
-        }
-
         public static IEnumerable<ContainerIdDistance> GetRegistertNearbyContainerWithItemWithLimit(Vector3 position, int workingArea, IEnumerable<KeyValuePair<ItemDrop, int?>> items)
         {
             List<ContainerIdDistance> nearbyContainer = GetRegistertNearbyContainer(position, workingArea).ToList();
@@ -249,45 +203,6 @@ namespace TomekDexValheimMod
             foreach (ContainerIdDistance cId in nearbyContainer)
                 if (idItemsCount[cId].Any(a => IsValid(a, nearbyContainer, savedCount, items)))
                     yield return cId;
-        }
-
-        private static bool IsValid(KeyValuePair<string, int> itemsCoun, List<ContainerIdDistance> nearbyContainer, Dictionary<string, int> savedCount, IEnumerable<KeyValuePair<ItemDrop, int?>> items)
-        {
-            Debug.LogWarning($"itemsCoun {itemsCoun.Key} {itemsCoun.Value}");
-            foreach (KeyValuePair<ItemDrop, int?> item in items)
-            {
-                string name = item.Key.m_itemData.m_shared.m_name;
-                if (itemsCoun.Key != name)
-                    continue;
-                if (itemsCoun.Value == 0)
-                    continue;
-                if (!itemsIdCount.ContainsKey(name))
-                    continue;
-                if (item.Value == 0)
-                    continue;
-                if (!savedCount.TryGetValue(name, out int count))
-                    savedCount[name] = count = CountItems(nearbyContainer, item.Key);
-                if (item.Value == null)
-                    return true;
-                if (item.Value < count)
-                    return true;
-            }
-
-            return false;
-        }
-
-        private static bool IsValid(KeyValuePair<ItemDrop, int?> itemsLimit, List<ContainerIdDistance> nearbyContainer)
-        {
-            if (!itemsIdCount.ContainsKey(itemsLimit.Key.m_itemData.m_shared.m_name))
-                return false;
-            if (itemsLimit.Value == null)
-                return true;
-            if (itemsLimit.Value == 0)
-                return false;
-            int count = CountItems(nearbyContainer, itemsLimit.Key);
-            if (itemsLimit.Value >= count)
-                return false;
-            return true;
         }
 
         public static IEnumerable<ContainerIdDistance> GetRegistertNearbyContainerWithItem(Vector3 position, int workingArea, ItemDrop item)
@@ -319,7 +234,52 @@ namespace TomekDexValheimMod
                 if (idCount.ContainsKey(cId))
                     yield return cId;
         }
+        #endregion GetContainer
 
+        #region Register
+        public static bool IsAnyRegistertNearbyContainer(Vector3 position, int workingArea)
+        {
+            if (!vectorRadiusId.ContainsKey((position, workingArea)))
+                if (!RegistertNearbyContainer(position, workingArea))
+                    return false;
+            return vectorRadiusId[(position, workingArea)].Any();
+        }
+
+        public static bool RegistertNearbyContainer(Vector3 position, int workingArea)
+        {
+            if (ContainerQuickAccessConfig.UseCheckAccess && Player.m_localPlayer == null)
+                return false;
+            if (!vectorRadiusId.ContainsKey((position, workingArea)))
+                vectorRadiusId[(position, workingArea)] = new SortedSet<ContainerIdDistance>(containerIdDistanceComparer);
+            foreach (ContainerIdDistance cId in GetNearbyContainer(position, workingArea))
+                RegistertNearbyContainer(position, workingArea, cId);
+            return true;
+        }
+
+        public static void UnRegistertNearbyContainer(Vector3 position, int workingArea)
+        {
+            if (!vectorRadiusId.TryGetValue((position, workingArea), out SortedSet<ContainerIdDistance> cIds))
+                return;
+            foreach (ContainerIdDistance cId in cIds)
+                if (idVectorRadius.TryGetValue(cId, out HashSet<(Vector3 vector, int radius)> radiusVector))
+                {
+                    radiusVector.Remove((position, workingArea));
+                    if (!radiusVector.Any())
+                        idVectorRadius.Remove(cId);
+                }
+            vectorRadiusId.Remove((position, workingArea));
+        }
+
+        private static void RegistertNearbyContainer(Vector3 position, int workingArea, ContainerIdDistance cId)
+        {
+            vectorRadiusId[(position, workingArea)].Add(cId);
+            if (!idVectorRadius.ContainsKey(cId))
+                idVectorRadius[cId] = new HashSet<(Vector3 vector, int radius)>();
+            idVectorRadius[cId].Add((position, workingArea));
+        }
+        #endregion Register
+
+        #region Management Container
         public static void AddContainer(Container container)
         {
             if (!IsContainerToAdd(container, out bool canMove))
@@ -334,19 +294,6 @@ namespace TomekDexValheimMod
             idContaniers.Add(cId);
             FillContainer(cId);
             CheekNewContainerRegistertNearbyContainer(cId);
-        }
-
-        private static void CheekNewContainerRegistertNearbyContainer(ContainerIdDistance cId)
-        {
-            foreach (KeyValuePair<(Vector3 vector, int radius), SortedSet<ContainerIdDistance>> vectorRadiusIds in vectorRadiusId)
-            {
-                float distance = GetDistance((vectorRadiusIds.Key.vector, cId.Container.m_nview.transform.position));
-                if (distance <= vectorRadiusIds.Key.radius)
-                {
-                    ContainerIdDistance cIdNew = new ContainerIdDistance(cId.Container, distance);
-                    RegistertNearbyContainer(vectorRadiusIds.Key.vector, vectorRadiusIds.Key.radius, cIdNew);
-                }
-            }
         }
 
         public static void RefreshContainerItems(ContainerIdDistance cId)
@@ -397,13 +344,6 @@ namespace TomekDexValheimMod
             }
         }
 
-        private static float GetDistance((Vector3, Vector3) vectors)
-        {
-            if (!distance.ContainsKey(vectors))
-                distance[vectors] = Vector3.Distance(vectors.Item1, vectors.Item2);
-            return distance[vectors];
-        }
-
         private static void FillContainer(ContainerIdDistance cId)
         {
             Dictionary<string, int> idItemsCountCId = new Dictionary<string, int>();
@@ -442,12 +382,17 @@ namespace TomekDexValheimMod
             return false;
         }
 
-        private static void RegistertNearbyContainer(Vector3 position, int workingArea, ContainerIdDistance cId)
+        private static void CheekNewContainerRegistertNearbyContainer(ContainerIdDistance cId)
         {
-            vectorRadiusId[(position, workingArea)].Add(cId);
-            if (!idVectorRadius.ContainsKey(cId))
-                idVectorRadius[cId] = new HashSet<(Vector3 vector, int radius)>();
-            idVectorRadius[cId].Add((position, workingArea));
+            foreach (KeyValuePair<(Vector3 vector, int radius), SortedSet<ContainerIdDistance>> vectorRadiusIds in vectorRadiusId)
+            {
+                float distance = GetDistance((vectorRadiusIds.Key.vector, cId.Container.m_nview.transform.position));
+                if (distance <= vectorRadiusIds.Key.radius)
+                {
+                    ContainerIdDistance cIdNew = new ContainerIdDistance(cId.Container, distance);
+                    RegistertNearbyContainer(vectorRadiusIds.Key.vector, vectorRadiusIds.Key.radius, cIdNew);
+                }
+            }
         }
 
         private static void RemoveItemCount(ContainerIdDistance cId)
@@ -458,6 +403,38 @@ namespace TomekDexValheimMod
                 if (!itemsIdCount[item.Key].Any())
                     itemsIdCount.Remove(item.Key);
             }
+        }
+        #endregion Management Container
+
+        private static bool IsValid(KeyValuePair<string, int> itemsCoun, List<ContainerIdDistance> nearbyContainer, Dictionary<string, int> savedCount, IEnumerable<KeyValuePair<ItemDrop, int?>> items)
+        {
+            foreach (KeyValuePair<ItemDrop, int?> item in items)
+            {
+                string name = item.Key.m_itemData.m_shared.m_name;
+                if (itemsCoun.Key != name)
+                    continue;
+                if (itemsCoun.Value == 0)
+                    continue;
+                if (!itemsIdCount.ContainsKey(name))
+                    continue;
+                if (item.Value == 0)
+                    continue;
+                if (!savedCount.TryGetValue(name, out int count))
+                    savedCount[name] = count = CountItems(nearbyContainer, item.Key);
+                if (item.Value == null)
+                    return true;
+                if (item.Value < count)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static float GetDistance((Vector3, Vector3) vectors)
+        {
+            if (!distance.ContainsKey(vectors))
+                distance[vectors] = Vector3.Distance(vectors.Item1, vectors.Item2);
+            return distance[vectors];
         }
     }
 }

@@ -39,11 +39,16 @@ namespace TomekDexValheimMod
             return null;
         }
 
+        static HashSet<string> hh = new HashSet<string>();
+
         public static void Postfix(object[] __args, MethodBase __originalMethod, MonoBehaviour __instance)
         {
             if (!Skanned.ContainsKey(__instance.name))
                 Skanned[__instance.name] = new HashSet<string>();
             Skanned[__instance.name].Add(__originalMethod.ReflectedType.Name);
+            string log = $"Log {__originalMethod.ReflectedType.Name} {__instance.name}";
+            if (hh.Add(log))
+                Debug.Log(log);
         }
     }
 }

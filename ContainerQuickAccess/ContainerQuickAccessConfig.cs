@@ -21,7 +21,7 @@ namespace TomekDexValheimMod
             UseShip = Config.Bind("ContainerQuickAccessConfig", "UseShip", true, "").Value;
             UseObliterator = Config.Bind("ContainerQuickAccessConfig", "UseObliterator", true, "").Value;
             UseCheckAccess = Config.Bind("ContainerQuickAccessConfig", "UseCheckAccess", false, "").Value;
-            UseCheckAccess = Config.Bind("Debug", "Logs", false, "").Value;
+            Logs = Config.Bind("Debug", "Logs", false, "").Value;
             if (UseCart || UseShip)
                 InvokeRepeating("RefreshContainerPosition", 30, 30);
         }
@@ -29,6 +29,7 @@ namespace TomekDexValheimMod
         public void RefreshContainerPosition()
         {
             ContainerQuickAccess.RefreshContainerPosition();
+
         }
     }
 }

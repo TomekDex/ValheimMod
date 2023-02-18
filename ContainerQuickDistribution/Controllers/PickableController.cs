@@ -19,7 +19,7 @@
             item.m_itemData.m_stack = MBComponet.m_amount;
             if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item))
             {
-                ContainerQuickAccess.TryRemoveItemNearbyContainer(MBComponet.transform.position, WorkingArea, item, MBComponet.m_amount - item.m_itemData.m_stack);
+                ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, item, MBComponet.m_amount - item.m_itemData.m_stack);
                 return;
             }
             if (!MBComponet.m_extraDrops.IsEmpty())

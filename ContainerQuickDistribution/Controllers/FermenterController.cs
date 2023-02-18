@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TomekDexValheimModHelper;
+using UnityEngine;
 using static Fermenter;
 
 namespace TomekDexValheimMod.Controllers
@@ -27,7 +28,7 @@ namespace TomekDexValheimMod.Controllers
             if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item))
             {
                 Vector3 position = MBComponet.m_outputPoint.position + Vector3.up * 0.3f;
-                ItemHelper.Drop(item, position);
+                ItemsHelper.Drop(item, position);
             }
             MBComponet.m_tapEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
             MBComponet.m_nview.GetZDO().Set("Content", "");
@@ -37,7 +38,7 @@ namespace TomekDexValheimMod.Controllers
         private void Add()
         {
             foreach (ItemConversion item in MBComponet.m_conversion)
-                if (ContainerQuickAccess.TryRemoveItemNearbyContainer(MBComponet.transform.position, WorkingArea, item.m_from, 1) == 1)
+                if (ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, item.m_from, 1) == 1)
                 {
                     MBComponet.m_addedEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
                     MBComponet.m_nview.GetZDO().Set("Content", item.m_from.name);

@@ -126,7 +126,7 @@ namespace TomekDexValheimMod.Controllers
             if (LimitWood.TryGetValue(MBComponet.m_fuelItem.name, out int limit))
                 if (limit >= ContainerQuickAccess.CountItems(MBComponet.transform.position, WorkingArea, MBComponet.m_fuelItem))
                     return;
-            int removed = ContainerQuickAccess.TryRemoveItemNearbyContainer(MBComponet.transform.position, WorkingArea, MBComponet.m_fuelItem, 1);
+            int removed = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, MBComponet.m_fuelItem, 1);
             if (removed == 0)
                 return;
             MBComponet.SetFuel(fuel + 1f);
@@ -144,7 +144,7 @@ namespace TomekDexValheimMod.Controllers
                     return;
                 if (SkipAdd(conversion))
                     continue;
-                int removed = ContainerQuickAccess.TryRemoveItemNearbyContainer(MBComponet.transform.position, WorkingArea, conversion.m_from, 1);
+                int removed = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, conversion.m_from, 1);
                 while (removed != 0)
                 {
                     MBComponet.SetSlot(freeSlot, conversion.m_from.name, 0f, Status.NotDone);
@@ -157,7 +157,7 @@ namespace TomekDexValheimMod.Controllers
                     freeSlot = MBComponet.GetFreeSlot();
                     if (freeSlot == -1)
                         return;
-                    removed = ContainerQuickAccess.TryRemoveItemNearbyContainer(MBComponet.transform.position, WorkingArea, conversion.m_from, 1);
+                    removed = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, conversion.m_from, 1);
                 }
             }
         }
@@ -169,7 +169,7 @@ namespace TomekDexValheimMod.Controllers
                 if (limit == 0)
                     return true;
                 int count = ContainerQuickAccess.CountItems(MBComponet.transform.position, WorkingArea, conversion.m_from);
-                if (ContainerQuickDistribution.Logs)
+                if (ContainerQuickDistributionConfig.Logs)
                     Debug.Log($"Limit {limit}/{count} {conversion.m_from?.name}");
                 if (limit >= count)
                     return true;
@@ -179,7 +179,7 @@ namespace TomekDexValheimMod.Controllers
                 if (limit == 0)
                     return true;
                 int count = ContainerQuickAccess.CountItems(MBComponet.transform.position, WorkingArea, conversion.m_to);
-                if (ContainerQuickDistribution.Logs)
+                if (ContainerQuickDistributionConfig.Logs)
                     Debug.Log($"Limit {limit}/{count} {conversion.m_to?.name}");
                 if (limit <= count)
                     return true;

@@ -53,8 +53,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine">
-      <HintPath>D:\Steam\steamapps\common\Valheim\mod\UnityEngine.dll</HintPath>
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Steam\steamapps\common\Valheim\valheim_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>D:\Steam\steamapps\common\Valheim\mod\UnityEngine.CoreModule.dll</HintPath>
@@ -64,8 +65,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContainerQuickDistributionConfig.cs" />
     <Compile Include="ContainerQuickDistributionInicializer.cs" />
     <Compile Include="ContainerQuickDistributionObject.cs" />
+    <Compile Include="ContainerQuickDistributionQueue.cs" />
+    <Compile Include="Controllers\CraftingStationController.cs" />
     <Compile Include="Controllers\ItemDropController.cs" />
     <Compile Include="Controllers\EggGrowController.cs" />
     <Compile Include="Controllers\ProcreationController.cs" />
@@ -79,7 +83,7 @@
     <Compile Include="Controllers\BeehiveController.cs" />
     <Compile Include="Controllers\TurretController.cs" />
     <Compile Include="ContainerQuickDistribution.cs" />
-    <Compile Include="ItemHelper.cs" />
+    <Compile Include="CraftingOption.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

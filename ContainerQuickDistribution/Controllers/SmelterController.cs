@@ -84,7 +84,7 @@ namespace TomekDexValheimMod.Controllers
             int queue = MBComponet.GetQueueSize();
             if (MBComponet.m_maxOre <= queue)
                 return;
-
+            bool anyAdd = false;
             foreach (ItemConversion conversion in MBComponet.m_conversion)
             {
                 string name = MBComponet.name.Replace("(Clone)", "").Trim();
@@ -94,15 +94,17 @@ namespace TomekDexValheimMod.Controllers
                 queue = MBComponet.GetQueueSize();
                 if (MBComponet.m_maxOre <= queue)
                     break;
-                int removed = ContainerQuickAccess.TryRemoveItemNearbyContainer(MBComponet.transform.position, WorkingArea, conversion.m_from, MBComponet.m_maxOre - queue);
+                int removed = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, conversion.m_from, MBComponet.m_maxOre - queue);
                 if (removed > 0)
                 {
+                    anyAdd = true;
                     for (int i = 0; i < removed; i++)
                         MBComponet.QueueOre(conversion.m_from.name);
                     produtionInProgres[MBComponet][conversion.m_from.name] = removed + queue;
                 }
             }
-            MBComponet.m_oreAddedEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
+            if (anyAdd)
+                MBComponet.m_oreAddedEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
         }
 
         private void AddFuel()
@@ -110,7 +112,7 @@ namespace TomekDexValheimMod.Controllers
             int fuel = Mathf.CeilToInt(MBComponet.GetFuel());
             if (fuel >= MBComponet.m_maxFuel)
                 return;
-            int removed = ContainerQuickAccess.TryRemoveItemNearbyContainer(MBComponet.transform.position, WorkingArea, MBComponet.m_fuelItem, MBComponet.m_maxFuel - fuel);
+            int removed = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, MBComponet.m_fuelItem, MBComponet.m_maxFuel - fuel);
             fuel += removed;
             MBComponet.SetFuel(fuel);
             MBComponet.m_fuelAddedEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
@@ -121,7 +123,7 @@ namespace TomekDexValheimMod.Controllers
         {
             if (SkipOre.TryGetValue(name, out HashSet<string> skip) && skip.Contains(conversion.m_from?.name))
             {
-                if (ContainerQuickDistribution.Logs)
+                if (ContainerQuickDistributionConfig.Logs)
                     Debug.Log($"SkipOre {conversion.m_from?.name} {name}");
                 return true;
             }
@@ -130,7 +132,7 @@ namespace TomekDexValheimMod.Controllers
                 if (limit == 0)
                     return true;
                 int count = ContainerQuickAccess.CountItems(MBComponet.transform.position, WorkingArea, conversion.m_to);
-                if (ContainerQuickDistribution.Logs)
+                if (ContainerQuickDistributionConfig.Logs)
                     Debug.Log($"Limit {limit}/{count} {conversion.m_to?.name}");
                 if (count >= limit)
                     return true;
@@ -146,7 +148,7 @@ namespace TomekDexValheimMod.Controllers
                 if (limit == 0)
                     return true;
                 int count = ContainerQuickAccess.CountItems(MBComponet.transform.position, WorkingArea, conversion.m_from);
-                if (ContainerQuickDistribution.Logs)
+                if (ContainerQuickDistributionConfig.Logs)
                     Debug.Log($"Limit {limit}/{count} {conversion.m_from.name}");
                 if (count <= limit)
                     return true;

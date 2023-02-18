@@ -15,7 +15,7 @@
         {
             if (ammoIn != 0 && MBComponet.m_nview.GetZDO().GetString("ammoType") != ammo.m_ammo.name)
                 return false;
-            int ammoToAdd = ContainerQuickAccess.TryRemoveItemNearbyContainer(MBComponet.transform.position, WorkingArea, ammo.m_ammo, MBComponet.m_maxAmmo - ammoIn);
+            int ammoToAdd = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, ammo.m_ammo, MBComponet.m_maxAmmo - ammoIn);
             if (ammoToAdd == 0)
                 return false;
             ammoIn += ammoToAdd;

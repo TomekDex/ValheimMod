@@ -45,7 +45,7 @@ namespace TomekDexValheimMod
 
         public static void Postfix(object[] __args, MethodBase __originalMethod, dynamic __instance, ZNetView ___m_nview)
         {
-            if (!ContainerQuickDistribution.ConfigOn[__originalMethod.ReflectedType])
+            if (!ContainerQuickDistributionConfig.ConfigOn[__originalMethod.ReflectedType])
                 return;
             if (___m_nview?.isActiveAndEnabled == true)
                 __instance.gameObject.AddComponent(controllers[__originalMethod.ReflectedType]);

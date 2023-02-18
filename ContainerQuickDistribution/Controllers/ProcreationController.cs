@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TomekDexValheimModHelper;
 using UnityEngine;
 
 
@@ -28,7 +29,7 @@ namespace TomekDexValheimMod.Controllers
                     lastPosition = new Vector3(MBComponet.transform.position.x, MBComponet.transform.position.y, MBComponet.transform.position.z);
                 }
             }
-            if (ContainerQuickDistribution.Logs)
+            if (ContainerQuickDistributionConfig.Logs)
                 Debug.Log($"Found Peers {peers}, offsping {offspring}, partners {partners}, max peers and offsping is {MBComponet.m_maxCreatures} {MBComponet.name}");
             if (!ContainerQuickAccess.IsAnyRegistertNearbyContainer(MBComponet.transform.position, WorkingArea))
                 return;
@@ -59,7 +60,7 @@ namespace TomekDexValheimMod.Controllers
                 ItemDrop item = prefab.GetComponent<ItemDrop>();
                 item.m_itemData.m_stack = items.Value;
                 if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item))
-                    ItemHelper.Drop(item, MBComponet.transform.position);
+                    ItemsHelper.Drop(item, MBComponet.transform.position);
                 MBComponet.m_character.m_nview.Destroy();
             }
         }

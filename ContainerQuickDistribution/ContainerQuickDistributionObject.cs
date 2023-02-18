@@ -8,12 +8,15 @@ namespace TomekDexValheimMod
         where T : MonoBehaviour
     {
         public static bool On { get; set; }
+        public static bool UseQueue { get; set; }
         public static int WorkingArea { get; set; }
         public static float MinSecUpdate { get; set; }
         public static float MaxSecUpdate { get; set; }
         public static HashSet<string> Disable { get; set; }
         public static HashSet<string> DisableAllExcept { get; set; }
         public T MBComponet { get; private set; }
+
+        private (MonoBehaviour mb, System.Type type) element;
 
         private bool registerted;
 
@@ -34,9 +37,16 @@ namespace TomekDexValheimMod
                 Destroy(this);
                 return;
             }
-            StartCoroutine(Coroutine());
-            if (ContainerQuickDistribution.Logs)
-                Debug.Log($"Awake {MBComponet.GetType().Name} || {MBComponet.name}");
+
+            if (UseQueue)
+            {
+                element = (MBComponet, GetType());
+                ContainerQuickDistributionQueue.Queue.AddLast(element);
+            }
+            else
+                StartCoroutine(Coroutine());
+            if (ContainerQuickDistributionConfig.Logs)
+                Debug.Log($"Awake {MBComponet.GetType().Name} || {MBComponet.name} || {MBComponet.transform.position}");
         }
 
         private IEnumerator Coroutine()
@@ -49,7 +59,7 @@ namespace TomekDexValheimMod
                 System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
                 UpdateOnTime();
                 sw.Stop();
-                if (ContainerQuickDistribution.Logs)
+                if (ContainerQuickDistributionConfig.Logs)
                     Debug.Log($"Update {MBComponet.GetType().Name} ||| {sw.Elapsed} ||| {MBComponet.name}");
             }
         }
@@ -58,6 +68,7 @@ namespace TomekDexValheimMod
 
         private void OnDestroy()
         {
+            ContainerQuickDistributionQueue.Queue.Remove(element);
             ContainerQuickAccess.UnRegistertNearbyContainer(MBComponet.transform.position, WorkingArea);
         }
     }

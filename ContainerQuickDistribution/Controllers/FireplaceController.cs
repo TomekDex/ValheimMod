@@ -10,10 +10,13 @@ namespace TomekDexValheimMod.Controllers
             float fuel = MBComponet.m_nview.GetZDO().GetFloat("fuel");
             if (Mathf.CeilToInt(fuel) >= maxFuel)
                 return;
-            fuel += ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, MBComponet.m_fuelItem, Mathf.FloorToInt(maxFuel - fuel));
-            MBComponet.m_nview.GetZDO().Set("fuel", fuel);
-            MBComponet.m_fuelAddedEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
-            MBComponet.UpdateState();
+            int removed = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, MBComponet.m_fuelItem, Mathf.FloorToInt(maxFuel - fuel));
+            if (removed > 0)
+            {
+                MBComponet.m_nview.GetZDO().Set("fuel", fuel + removed);
+                MBComponet.m_fuelAddedEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
+                MBComponet.UpdateState();
+            }
         }
     }
 }

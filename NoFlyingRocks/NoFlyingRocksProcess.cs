@@ -32,6 +32,8 @@ namespace TomekDexValheimMod
                 Debug.Log(log);
             if (hitAreaConteners.Count == 0 || Player.m_localPlayer == null)
                 return;
+            if (Player.m_players.Any(a => a.IsTeleporting()))
+                return;
             if (ChcekTasks(fillCollidersTask, FillCollidersTask, clearCollidersTasks, 20))
             {
                 Debug.Log($"Preliminary checking of the borders {fillCollidersTask.Count}");
@@ -70,12 +72,19 @@ namespace TomekDexValheimMod
 
         private static void RefreshGroundColliderTask()
         {
-            foreach (Collider collider in refreshGroundCollider.Keys.ToList())
+            try
             {
-                refreshGroundCollider.TryRemove(collider, out _);
-                if (!hitAreaContenersAll.TryGetValue(collider, out HitAreaContener hit))
-                    continue;
-                UpdateGroundColldiders(collider, hit);
+                foreach (Collider collider in refreshGroundCollider.Keys.ToList())
+                {
+                    if (!hitAreaContenersAll.TryGetValue(collider, out HitAreaContener hit))
+                        continue;
+                    UpdateGroundColldiders(collider, hit);
+                    refreshGroundCollider.TryRemove(collider, out _);
+                }
+            }
+            catch (Exception ex)
+            {
+                logs.Add($"Error in RefreshGroundColliderTask\r\n{ex.ToString()}");
             }
         }
 
@@ -284,12 +293,20 @@ namespace TomekDexValheimMod
 
         internal static void RemoveMineRock5(MineRock5 mineRock5)
         {
-            foreach (Collider key in hitAreaConteners[mineRock5].Keys)
-                hitAreaContenersAll.TryRemove(key, out _);
+            if (hitAreaConteners.TryGetValue(mineRock5, out Dictionary<Collider, HitAreaContener> contener))
+                foreach (Collider collider in contener.Keys)
+                {
+                    hitAreaContenersAll.TryRemove(collider, out HitAreaContener hit);
+                    if (hit.GroundColldiders != null)
+                        foreach (Collider groundColldider in hit.GroundColldiders.Keys)
+                            if (groundColliders.TryGetValue(groundColldider, out ConcurrentDictionary<Collider, object> colliders))
+                                colliders.TryRemove(collider, out _);
+                }
             hitAreaConteners.TryRemove(mineRock5, out _);
             fillCollidersTask.TryRemove(mineRock5, out _);
             clearCollidersTasks.TryRemove(mineRock5, out _);
             calculateMeshAdjacentTask.TryRemove(mineRock5, out _);
+            validationTask.TryRemove(mineRock5, out _);
         }
 
         internal static void PokeGroundCollider(MeshCollider groundCollider)

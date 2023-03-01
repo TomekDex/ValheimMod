@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E5563A3B-12D1-4662-B46E-9A370F9AB3B8}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>NoFlyingRocksCalculator</RootNamespace>
-    <AssemblyName>NoFlyingRocksCalculator</AssemblyName>
+    <ProjectGuid>{2D4FF497-DEC8-4F63-84F2-16F00FFC81EC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NoFlyingRocksLibrary</RootNamespace>
+    <AssemblyName>NoFlyingRocksLibrary</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,17 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="FlattenedDataCollider.cs" />
+    <Compile Include="FlattenedDataMineRock5.cs" />
+    <Compile Include="GJKCollisionDetection2.cs" />
+    <Compile Include="Point3D.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NoFlyingRocksLibrary\NoFlyingRocksLibrary.csproj">
-      <Project>{2d4ff497-dec8-4f63-84f2-16f00ffc81ec}</Project>
-      <Name>NoFlyingRocksLibrary</Name>
-    </ProjectReference>
+    <Compile Include="SATCollisionDetection2.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

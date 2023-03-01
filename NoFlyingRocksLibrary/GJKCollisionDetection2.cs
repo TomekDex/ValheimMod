@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace TomekDexValheimMod
 {
@@ -28,9 +27,6 @@ namespace TomekDexValheimMod
 
         public static bool CheckCollision(Point3D[] vertices1, int[] indices1, Point3D center1, Point3D[] vertices2, int[] indices2, Point3D center2)
         {
-            //Debug.Log($"{center1} {CalculateMeshCenter(vertices1, indices1)} {center2} {CalculateMeshCenter(vertices2, indices2)}");
-            //Point3D d = CalculateMeshCenter(vertices1, indices1) - CalculateMeshCenter(vertices2, indices2);
-
             Point3D d = center1 - center2;
             List<Point3D> simplex = new List<Point3D>();
             simplex.Add(Support(vertices1, indices1, vertices2, indices2, d));

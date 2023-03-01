@@ -17,27 +17,27 @@ namespace TomekDexValheimMod
 
         private static readonly int updateCount;
 
-        //private static bool HaveGroundIndStick(HitAreaContener hit, HashSet<HitAreaContener> cheked)
+        //private static bool HaveGroundIndAdjacent(HitAreaContener hit, HashSet<HitAreaContener> cheked)
         //{
         //    if (hit.StandingOnGround)
         //    {
         //        lightningAOE(hit.HitArea.m_collider.transform);
         //        return true;
         //    }
-        //    if (hit.NoHaveGroundInSticked == updateCount)
+        //    if (hit.NoHaveGroundInAdjacented == updateCount)
         //        return false;
-        //    if (hit.HaveGroundInSticked == updateCount)
+        //    if (hit.HaveGroundInAdjacented == updateCount)
         //        return true;
-        //    foreach (HitAreaContener hited in hit.Sticks)
+        //    foreach (HitAreaContener hited in hit.Adjacents)
         //    {
         //        if (cheked.Add(hited))
-        //            if (HaveGroundIndStick(hited, cheked))
+        //            if (HaveGroundIndAdjacent(hited, cheked))
         //            {
-        //                hit.HaveGroundInSticked = updateCount;
+        //                hit.HaveGroundInAdjacented = updateCount;
         //                return true;
         //            }
         //    }
-        //    hit.NoHaveGroundInSticked = updateCount;
+        //    hit.NoHaveGroundInAdjacented = updateCount;
         //    return false;
         //}
 
@@ -85,7 +85,7 @@ namespace TomekDexValheimMod
 
             //HashSet<HitAreaContener> cheked = new HashSet<HitAreaContener> { hitAreaContener };
             //updateCount++;
-            //if (HaveGroundIndStick(hitAreaContener, cheked))
+            //if (HaveGroundIndAdjacent(hitAreaContener, cheked))
             //{
 
             //}

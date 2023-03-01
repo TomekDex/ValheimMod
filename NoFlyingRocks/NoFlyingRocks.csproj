@@ -64,18 +64,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FlattenedDataCollider.cs" />
-    <Compile Include="FlattenedDataMineRock5.cs" />
-    <Compile Include="GJKCollisionDetection2.cs" />
-    <Compile Include="HitAreaContenerOld.cs" />
+    <Compile Include="HitAreaContener.cs" />
     <Compile Include="HitAreaController.cs" />
     <Compile Include="MeshObjectCollision.cs" />
-    <Compile Include="Ms.cs" />
     <Compile Include="NoFlyingMineRock5.cs" />
     <Compile Include="NoFlyingRocks.cs" />
+    <Compile Include="NoFlyingRocksProcess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Point3D.cs" />
-    <Compile Include="SATCollisionDetection2.cs" />
     <Compile Include="GJKCollisionDetection.cs" />
     <Compile Include="SATCollisionDetection.cs" />
   </ItemGroup>

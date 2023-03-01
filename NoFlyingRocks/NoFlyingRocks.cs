@@ -11,13 +11,18 @@ namespace TomekDexValheimMod
         public void Awake()
         {
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), null);
-            StartCoroutine(HitAreaController.Coroutine());
             InvokeRepeating("DestroyOnTime", 1f, 1f);
+            InvokeRepeating("Process", 1f, 1f);
         }
 
         public void DestroyOnTime()
         {
-            HitAreaController.DestroyOnTime();
+            NoFlyingRocksProcess.DestroyOnTime();
+        }
+
+        public void Process()
+        {
+            NoFlyingRocksProcess.Process();
         }
     }
 }

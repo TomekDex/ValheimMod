@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace TomekDexValheimMod
@@ -61,7 +60,7 @@ namespace TomekDexValheimMod
         }
 
         private static ConcurrentDictionary<(FlattenedDataCollider, FlattenedDataCollider), bool> cache = new ConcurrentDictionary<(FlattenedDataCollider, FlattenedDataCollider), bool>();
-        internal static bool CheckCollision(FlattenedDataCollider flattenedDataCollider1, FlattenedDataCollider flattenedDataCollider2)
+        public static bool CheckCollision(FlattenedDataCollider flattenedDataCollider1, FlattenedDataCollider flattenedDataCollider2)
         {
             var cacheKey1 = (flattenedDataCollider1, flattenedDataCollider2);
             var cacheKey2 = (flattenedDataCollider2, flattenedDataCollider1);

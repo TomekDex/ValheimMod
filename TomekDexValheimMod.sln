@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TomekDexValheimModHelper", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContainerQuickDistribution", "ContainerQuickDistribution\ContainerQuickDistribution.csproj", "{64550A00-2EAD-4CF8-81FB-404E599F5515}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkanMod", "SkanMod\SkanMod.csproj", "{DB1CE147-B98C-4DD1-93F4-B4F2575ED824}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContainerQuickAccess", "ContainerQuickAccess\ContainerQuickAccess.csproj", "{CAC22CA6-8815-4977-B415-9746D9E6D25D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoFlyingRocks", "NoFlyingRocks\NoFlyingRocks.csproj", "{60179020-36BE-4953-AA2A-9F80BB6266FA}"
@@ -35,10 +33,6 @@ Global
 		{64550A00-2EAD-4CF8-81FB-404E599F5515}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64550A00-2EAD-4CF8-81FB-404E599F5515}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64550A00-2EAD-4CF8-81FB-404E599F5515}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DB1CE147-B98C-4DD1-93F4-B4F2575ED824}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DB1CE147-B98C-4DD1-93F4-B4F2575ED824}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DB1CE147-B98C-4DD1-93F4-B4F2575ED824}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB1CE147-B98C-4DD1-93F4-B4F2575ED824}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CAC22CA6-8815-4977-B415-9746D9E6D25D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CAC22CA6-8815-4977-B415-9746D9E6D25D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAC22CA6-8815-4977-B415-9746D9E6D25D}.Release|Any CPU.ActiveCfg = Release|Any CPU

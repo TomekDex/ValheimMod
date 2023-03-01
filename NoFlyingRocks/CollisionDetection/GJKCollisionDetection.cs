@@ -28,9 +28,6 @@ namespace TomekDexValheimMod
 
         public static bool CheckCollision(Vector3[] vertices1, int[] indices1, Vector3 center1, Vector3[] vertices2, int[] indices2, Vector3 center2)
         {
-            //Debug.Log($"{center1} {CalculateMeshCenter(vertices1, indices1)} {center2} {CalculateMeshCenter(vertices2, indices2)}");
-            //Vector3 d = CalculateMeshCenter(vertices1, indices1) - CalculateMeshCenter(vertices2, indices2);
-
             Vector3 d = center1 - center2;
             List<Vector3> simplex = new List<Vector3>();
             simplex.Add(Support(vertices1, indices1, vertices2, indices2, d));

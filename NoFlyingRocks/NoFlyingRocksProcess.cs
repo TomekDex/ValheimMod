@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -11,10 +9,10 @@ namespace TomekDexValheimMod
 {
     public class NoFlyingRocksProcess
     {
-        public static ConcurrentDictionary<MineRock5, Dictionary<Collider, HitAreaContener>> hitAreaConteners = new ConcurrentDictionary<MineRock5, Dictionary<Collider, HitAreaContener>>();
-        public static readonly ConcurrentDictionary<Collider, HitAreaContener> hitAreaContenersAll = new ConcurrentDictionary<Collider, HitAreaContener>();
         private static readonly int layerMaskTerrain = LayerMask.GetMask("terrain");
         private static readonly int layerMask = LayerMask.GetMask("piece", "Default", "static_solid", "Default_small");
+        private static readonly ConcurrentDictionary<MineRock5, Dictionary<Collider, HitAreaContener>> hitAreaConteners = new ConcurrentDictionary<MineRock5, Dictionary<Collider, HitAreaContener>>();
+        private static readonly ConcurrentDictionary<Collider, HitAreaContener> hitAreaContenersAll = new ConcurrentDictionary<Collider, HitAreaContener>();
         private static readonly ConcurrentBag<string> logs = new ConcurrentBag<string>();
         private static readonly ConcurrentQueue<HitAreaContener> toDestroy = new ConcurrentQueue<HitAreaContener>();
         private static readonly HashSet<MineRock5> priorityQueue = new HashSet<MineRock5>();
@@ -23,45 +21,40 @@ namespace TomekDexValheimMod
         private static readonly ConcurrentDictionary<MineRock5, Task> clearCollidersTasks = new ConcurrentDictionary<MineRock5, Task>();
         private static readonly ConcurrentDictionary<MineRock5, Task> calculateMeshAdjacentTask = new ConcurrentDictionary<MineRock5, Task>();
         private static readonly ConcurrentDictionary<MineRock5, Task> findNotConnectedGroundTask = new ConcurrentDictionary<MineRock5, Task>();
-        private static readonly ConcurrentDictionary<MineRock5, Task> calculateMeshGroundTask = new ConcurrentDictionary<MineRock5, Task>();
+        private static readonly ConcurrentDictionary<MineRock5, Task> validationTask = new ConcurrentDictionary<MineRock5, Task>();
+        private static readonly ConcurrentDictionary<Collider, ConcurrentDictionary<Collider, object>> groundColliders = new ConcurrentDictionary<Collider, ConcurrentDictionary<Collider, object>>();
+        private static readonly ConcurrentDictionary<Collider, object> refreshGroundCollider = new ConcurrentDictionary<Collider, object>();
+        private static Task refreshGroundColliderTask;
 
         public static void Process()
         {
             while (logs.TryTake(out string log))
-            {
                 Debug.Log(log);
-            }
             if (hitAreaConteners.Count == 0 || Player.m_localPlayer == null)
-            {
-                Debug.Log($"hitAreaConteners.Count == 0");
-                Debug.Log($"hfillCollidersTask{fillCollidersTask.Count}");
                 return;
-            }
             if (ChcekTasks(fillCollidersTask, FillCollidersTask, clearCollidersTasks, 20))
             {
-                Debug.Log($"hfillCollidersTask.Any() {fillCollidersTask.Count}");
+                Debug.Log($"Preliminary checking of the borders {fillCollidersTask.Count}");
                 return;
             }
             if (ChcekTasks(clearCollidersTasks, FillGroundTask, calculateMeshAdjacentTask, 20))
             {
-                Debug.Log($"FillhGroundTask.Any() {clearCollidersTasks.Count}");
+                Debug.Log($"Thorough search for the ground {clearCollidersTasks.Count}");
                 return;
             }
-            if (ChcekTasks(calculateMeshAdjacentTask, CalculateMeshAdjacentTask, calculateMeshGroundTask, 5))
+            if (ChcekTasks(calculateMeshAdjacentTask, CalculateMeshAdjacentTask, validationTask, 5))
             {
-                Debug.Log($"calculateMeshAdjacentTask.Any() {calculateMeshAdjacentTask.Count}");
+                Debug.Log($"Thorough checking of the borders {calculateMeshAdjacentTask.Count}");
                 return;
             }
-            //if (ChcekTasks(calculateMeshGroundTask, CalculateMeshGroundTask, null, 1))
-            //{
-            //    Debug.Log($"calculateMeshGroundTask.Any() {calculateMeshAdjacentTask.Count}");
-            //}
+            if (refreshGroundCollider.Any() && (refreshGroundColliderTask == null || refreshGroundColliderTask.IsCompleted))
+            {
+                Debug.Log($"Ground level to recalculate {refreshGroundCollider.Count}");
+                refreshGroundColliderTask = new Task(RefreshGroundColliderTask);
+                refreshGroundColliderTask.Start();
+            }
             if (ChcekTasks(findNotConnectedGroundTask, FindNotConnectedGroundTask, null, 1))
-            {
-                Debug.Log($"findNotConnectedGroundTask.Any() {findNotConnectedGroundTask.Count}");
                 return;
-            }
-
             MineRock5 key;
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
             do
@@ -69,11 +62,21 @@ namespace TomekDexValheimMod
                 if (sw.ElapsedMilliseconds > 10)
                     return;
                 key = GetKeyHitAreaConteners();
-
-            } while (key != null && Player.GetClosestPlayer(key.transform.position, 20) == null);
+            } while (key == null || Player.GetClosestPlayer(key.transform.position, 20) == null || !validationTask.ContainsKey(key));
             findNotConnectedGroundTask.TryAdd(key, null);
             ChcekTasks(findNotConnectedGroundTask, FindNotConnectedGroundTask, null, 1);
-            Debug.Log($"findNotConnectedGroundTask.Any() {findNotConnectedGroundTask.Count}");
+            MeshObjectCollision.ClearCache();
+        }
+
+        private static void RefreshGroundColliderTask()
+        {
+            foreach (Collider collider in refreshGroundCollider.Keys.ToList())
+            {
+                refreshGroundCollider.TryRemove(collider, out _);
+                if (!hitAreaContenersAll.TryGetValue(collider, out HitAreaContener hit))
+                    continue;
+                UpdateGroundColldiders(collider, hit);
+            }
         }
 
         private static void FindNotConnectedGroundTask(Dictionary<Collider, HitAreaContener> mineRock5Data)
@@ -81,7 +84,7 @@ namespace TomekDexValheimMod
             foreach (HitAreaContener hit in mineRock5Data.Values)
             {
                 HashSet<HitAreaContener> cheked = new HashSet<HitAreaContener>();
-                if (!HasConnectionWithGround(hit, cheked))
+                if (hit.HitArea.m_health > 0 && !HasConnectionWithGround(hit, cheked))
                     toDestroy.Enqueue(hit);
             }
         }
@@ -92,8 +95,8 @@ namespace TomekDexValheimMod
                 return false;
             if (hit.GroundColldiders.Any())
                 return true;
-            foreach (Collider colider in hit.CollidersAdjacent)
-                if (hitAreaContenersAll.TryGetValue(colider, out HitAreaContener hitted))
+            foreach (Collider collider in hit.CollidersAdjacent)
+                if (hitAreaContenersAll.TryGetValue(collider, out HitAreaContener hitted) && hitted.HitArea.m_health > 0)
                     if (HasConnectionWithGround(hitted, cheked))
                         return true;
             return false;
@@ -107,28 +110,32 @@ namespace TomekDexValheimMod
 
         private static void FillGroundTask(Dictionary<Collider, HitAreaContener> mineRock5Data)
         {
-            foreach (HitAreaContener hit in mineRock5Data.Values.ToList())
+            foreach (KeyValuePair<Collider, HitAreaContener> hit in mineRock5Data.ToList())
+                UpdateGroundColldiders(hit.Key, hit.Value);
+        }
+
+        private static void UpdateGroundColldiders(Collider collider, HitAreaContener hit)
+        {
+            ConcurrentDictionary<Collider, object> tempGroundColldiders = new ConcurrentDictionary<Collider, object>();
+            foreach (Collider colliderGround in Physics.OverlapBox(collider.bounds.center, collider.bounds.size * 0.5f, hit.HitArea.m_bound.m_rot, layerMaskTerrain))
             {
-                hit.GroundColldiders = new ConcurrentDictionary<Collider, object>();
-                foreach (var item in Physics.OverlapBox(hit.HitArea.m_collider.bounds.center, hit.HitArea.m_collider.bounds.size * 0.5f, hit.HitArea.m_bound.m_rot, layerMaskTerrain))
-                    hit.GroundColldiders.TryAdd(item, null);
+                if (MeshObjectCollision.InGroundRaycast((MeshCollider)colliderGround, collider.GetComponent<MeshCollider>()))
+                {
+                    tempGroundColldiders.TryAdd(colliderGround, null);
+                    if (!groundColliders.ContainsKey(colliderGround))
+                        groundColliders.TryAdd(colliderGround, new ConcurrentDictionary<Collider, object>());
+                    groundColliders[colliderGround].TryAdd(collider, null);
+                }
             }
+            hit.GroundColldiders = tempGroundColldiders;
         }
 
         private static void CalculateMeshAdjacentTask(Dictionary<Collider, HitAreaContener> mineRock5Data)
         {
             foreach (KeyValuePair<Collider, HitAreaContener> col in mineRock5Data.ToList())
-                foreach (Collider item in col.Value.CollidersAdjacent.ToList())
-                    if (!MeshObjectCollision.DetectionSAT(item.GetComponent<MeshCollider>(), col.Key.GetComponent<MeshCollider>()))
-                        col.Value.CollidersAdjacent.Remove(item);
-        }
-
-        private static void CalculateMeshGroundTask(Dictionary<Collider, HitAreaContener> mineRock5Data)
-        {
-            foreach (KeyValuePair<Collider, HitAreaContener> col in mineRock5Data.ToList())
-                foreach (Collider item in col.Value.GroundColldiders.Keys.ToList())
-                    if (!MeshObjectCollision.DetectionRaycast((MeshCollider)item, col.Key.GetComponent<MeshCollider>()))
-                        col.Value.GroundColldiders.TryRemove(item, out _);
+                foreach (Collider collider in col.Value.CollidersAdjacent.ToList())
+                    if (!MeshObjectCollision.DetectionSAT(collider.GetComponent<MeshCollider>(), col.Key.GetComponent<MeshCollider>()))
+                        col.Value.CollidersAdjacent.Remove(collider);
         }
 
         private static bool ChcekTasks(ConcurrentDictionary<MineRock5, Task> tasksDictionary, Action<Dictionary<Collider, HitAreaContener>> taskAction, ConcurrentDictionary<MineRock5, Task> next, int maxStarted)
@@ -249,7 +256,7 @@ namespace TomekDexValheimMod
                     touch.m_nview.Destroy();
             }
             sw.Stop();
-            Debug.Log($"DestroyOnTime {sw.Elapsed} {touched.Count}/{count}");
+            Debug.Log($"Destroyed elements {count}");
         }
 
         internal static void AddMineRock5(MineRock5 mineRock5)
@@ -269,6 +276,12 @@ namespace TomekDexValheimMod
             fillCollidersTask.TryAdd(mineRock5, null);
         }
 
+        internal static void AddToPriorityQueue(MineRock5 mineRock5)
+        {
+            if (validationTask.ContainsKey(mineRock5))
+                priorityQueue.Add(mineRock5);
+        }
+
         internal static void RemoveMineRock5(MineRock5 mineRock5)
         {
             foreach (Collider key in hitAreaConteners[mineRock5].Keys)
@@ -277,6 +290,13 @@ namespace TomekDexValheimMod
             fillCollidersTask.TryRemove(mineRock5, out _);
             clearCollidersTasks.TryRemove(mineRock5, out _);
             calculateMeshAdjacentTask.TryRemove(mineRock5, out _);
+        }
+
+        internal static void PokeGroundCollider(MeshCollider groundCollider)
+        {
+            if (groundColliders.TryGetValue(groundCollider, out ConcurrentDictionary<Collider, object> colliders))
+                foreach (Collider collider in colliders.Keys.ToList())
+                    refreshGroundCollider.TryAdd(collider, null);
         }
     }
 }

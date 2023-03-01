@@ -16,26 +16,6 @@ namespace TomekDexValheimMod
         [HarmonyPatch(typeof(Player), "OnJump")]
         public static void Prefix(Player __instance)
         {
-            foreach (var item in ItemDrop.m_instances)
-            {
-                if (item.name.Contains("ChickenEgg") || item.name.Contains("DragonEgg"))
-                {
-                    Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log(item.gameObject);
-                    Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log(item);
-                    Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Log(item.m_itemData);
-                    Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    foreach (var item2 in item.m_itemData.m_customData)
-                    {
-                        Debug.Log($"{item2.Key} {item2.Value}");
-
-                    }
-                    Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                }
-
-            }
             
             foreach (var item in Skan.Skanned.OrderBy(a => a.Key))
             {
@@ -43,8 +23,6 @@ namespace TomekDexValheimMod
                 if (raported.Add(log))
                     Debug.Log(log);
             }
-
-            //Skaning(__instance);
         }
 
 

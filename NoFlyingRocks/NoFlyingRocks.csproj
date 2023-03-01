@@ -65,14 +65,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HitAreaContener.cs" />
-    <Compile Include="HitAreaController.cs" />
-    <Compile Include="MeshObjectCollision.cs" />
-    <Compile Include="NoFlyingMineRock5.cs" />
+    <Compile Include="MineRock5Extension.cs" />
+    <Compile Include="CollisionDetection\MeshObjectCollision.cs" />
+    <Compile Include="Controller.cs" />
     <Compile Include="NoFlyingRocks.cs" />
     <Compile Include="NoFlyingRocksProcess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GJKCollisionDetection.cs" />
-    <Compile Include="SATCollisionDetection.cs" />
+    <Compile Include="CollisionDetection\GJKCollisionDetection.cs" />
+    <Compile Include="CollisionDetection\SATCollisionDetection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

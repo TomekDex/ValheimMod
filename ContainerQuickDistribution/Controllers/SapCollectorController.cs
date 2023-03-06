@@ -12,7 +12,7 @@ namespace TomekDexValheimMod.Controllers
             MBComponet.m_spawnEffect.Create(MBComponet.m_spawnPoint.position, Quaternion.identity);
             ItemDrop item = Instantiate(MBComponet.m_spawnItem);
             item.m_itemData.m_stack = level;
-            if (ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item))
+            if (ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item.m_itemData))
             {
                 MBComponet.ResetLevel();
                 MBComponet.m_spawnEffect.Create(MBComponet.transform.position, Quaternion.identity);

@@ -11,6 +11,7 @@ namespace TomekDexValheimMod
         public int Id { get; }
         public HashSet<Collider> CollidersAdjacent { get; internal set; }
         public ConcurrentDictionary<Collider, object> GroundColldiders { get; internal set; }
+        public HashSet<Collider> CollidersAdjacentDefault { get; internal set; }
 
         public HitAreaContener(MineRock5.HitArea hitArea, MineRock5 mineRock5)
         {

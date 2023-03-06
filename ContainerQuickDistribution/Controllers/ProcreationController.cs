@@ -59,7 +59,7 @@ namespace TomekDexValheimMod.Controllers
                 GameObject prefab = Instantiate(items.Key);
                 ItemDrop item = prefab.GetComponent<ItemDrop>();
                 item.m_itemData.m_stack = items.Value;
-                if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item))
+                if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item.m_itemData))
                     ItemsHelper.Drop(item, MBComponet.transform.position);
                 MBComponet.m_character.m_nview.Destroy();
             }

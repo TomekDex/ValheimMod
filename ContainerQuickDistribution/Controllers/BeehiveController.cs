@@ -11,7 +11,7 @@ namespace TomekDexValheimMod.Controllers
             {
                 ItemDrop item = Instantiate(MBComponet.m_honeyItem);
                 item.m_itemData.m_stack = honeyLevel;
-                if (ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item))
+                if (ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item.m_itemData))
                 {
                     MBComponet.m_nview.GetZDO().Set("level", 0);
                     MBComponet.m_spawnEffect.Create(MBComponet.transform.position, Quaternion.identity);

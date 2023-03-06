@@ -10,7 +10,8 @@ namespace TomekDexValheimMod
     public class NoFlyingRocksProcess
     {
         private static readonly int layerMaskTerrain = LayerMask.GetMask("terrain");
-        private static readonly int layerMask = LayerMask.GetMask("piece", "Default", "static_solid", "Default_small");
+        private static readonly int layerMaskDefault = LayerMask.GetMask("Default");
+        private static readonly int layerMask = LayerMask.GetMask("piece", "static_solid", "Default_small", "Default");
         private static readonly ConcurrentDictionary<MineRock5, Dictionary<Collider, HitAreaContener>> hitAreaConteners = new ConcurrentDictionary<MineRock5, Dictionary<Collider, HitAreaContener>>();
         private static readonly ConcurrentDictionary<Collider, HitAreaContener> hitAreaContenersAll = new ConcurrentDictionary<Collider, HitAreaContener>();
         private static readonly ConcurrentBag<string> logs = new ConcurrentBag<string>();
@@ -104,6 +105,8 @@ namespace TomekDexValheimMod
                 return false;
             if (hit.GroundColldiders.Any())
                 return true;
+            if (hit.CollidersAdjacentDefault.Any())
+                return true;
             foreach (Collider collider in hit.CollidersAdjacent)
                 if (hitAreaContenersAll.TryGetValue(collider, out HitAreaContener hitted) && hitted.HitArea.m_health > 0)
                     if (HasConnectionWithGround(hitted, cheked))
@@ -114,7 +117,10 @@ namespace TomekDexValheimMod
         private static void FillCollidersTask(Dictionary<Collider, HitAreaContener> mineRock5Data)
         {
             foreach (HitAreaContener hit in mineRock5Data.Values)
+            {
                 hit.CollidersAdjacent = Physics.OverlapBox(hit.HitArea.m_collider.bounds.center, hit.HitArea.m_collider.bounds.size * 0.5f, hit.HitArea.m_bound.m_rot, layerMask).Where(a => hitAreaContenersAll.ContainsKey(a)).ToHashSet();
+                hit.CollidersAdjacentDefault = Physics.OverlapBox(hit.HitArea.m_collider.bounds.center, hit.HitArea.m_collider.bounds.size * 0.5f, hit.HitArea.m_bound.m_rot, layerMaskDefault).Where(a => !hitAreaContenersAll.ContainsKey(a)).ToHashSet();
+            }
         }
 
         private static void FillGroundTask(Dictionary<Collider, HitAreaContener> mineRock5Data)
@@ -142,9 +148,14 @@ namespace TomekDexValheimMod
         private static void CalculateMeshAdjacentTask(Dictionary<Collider, HitAreaContener> mineRock5Data)
         {
             foreach (KeyValuePair<Collider, HitAreaContener> col in mineRock5Data.ToList())
+            {
+                MeshCollider meshCollider = col.Key.GetComponent<MeshCollider>();
                 foreach (Collider collider in col.Value.CollidersAdjacent.ToList())
-                    if (!MeshObjectCollision.DetectionSAT(collider.GetComponent<MeshCollider>(), col.Key.GetComponent<MeshCollider>()))
+                    if (!MeshObjectCollision.DetectionSAT(collider.GetComponent<MeshCollider>(), meshCollider))
                         col.Value.CollidersAdjacent.Remove(collider);
+                if (!col.Value.CollidersAdjacentDefault.Any(c => c.GetType() == typeof(BoxCollider) && MeshObjectCollision.DetectionSAT(meshCollider, (BoxCollider)c)))
+                    col.Value.CollidersAdjacentDefault.Clear();
+            }
         }
 
         private static bool ChcekTasks(ConcurrentDictionary<MineRock5, Task> tasksDictionary, Action<Dictionary<Collider, HitAreaContener>> taskAction, ConcurrentDictionary<MineRock5, Task> next, int maxStarted)
@@ -293,6 +304,15 @@ namespace TomekDexValheimMod
 
         internal static void RemoveMineRock5(MineRock5 mineRock5)
         {
+            if (fillCollidersTask.TryRemove(mineRock5, out Task task))
+                task?.Wait();
+            if (clearCollidersTasks.TryRemove(mineRock5, out task))
+                task?.Wait();
+            if (calculateMeshAdjacentTask.TryRemove(mineRock5, out task))
+                task?.Wait();
+            if (validationTask.TryRemove(mineRock5, out task))
+                task?.Wait();
+            refreshGroundColliderTask?.Wait();
             if (hitAreaConteners.TryGetValue(mineRock5, out Dictionary<Collider, HitAreaContener> contener))
                 foreach (Collider collider in contener.Keys)
                 {
@@ -303,10 +323,6 @@ namespace TomekDexValheimMod
                                 colliders.TryRemove(collider, out _);
                 }
             hitAreaConteners.TryRemove(mineRock5, out _);
-            fillCollidersTask.TryRemove(mineRock5, out _);
-            clearCollidersTasks.TryRemove(mineRock5, out _);
-            calculateMeshAdjacentTask.TryRemove(mineRock5, out _);
-            validationTask.TryRemove(mineRock5, out _);
         }
 
         internal static void PokeGroundCollider(MeshCollider groundCollider)

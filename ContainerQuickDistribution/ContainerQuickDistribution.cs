@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace TomekDexValheimMod
 {
-    [BepInPlugin("TomekDexValheimMod.ContainerQuickDistribution", "ContainerQuickDistribution", "1.0.2")]
+    [BepInPlugin("TomekDexValheimMod.ContainerQuickDistribution", "ContainerQuickDistribution", "2.0.0")]
     [BepInProcess("valheim.exe")]
     public class ContainerQuickDistribution : BaseUnityPlugin
     {

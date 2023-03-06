@@ -25,7 +25,7 @@ namespace TomekDexValheimMod.Controllers
                 return;
             ItemDrop item = Instantiate(itemConversion.m_to);
             item.m_itemData.m_stack = itemConversion.m_producedItems;
-            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item))
+            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item.m_itemData))
             {
                 Vector3 position = MBComponet.m_outputPoint.position + Vector3.up * 0.3f;
                 ItemsHelper.Drop(item, position);

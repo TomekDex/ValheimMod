@@ -10,7 +10,7 @@ namespace TomekDexValheimMod.Controllers
             if (!MBComponet.CanPickup())
                 return;
             MBComponet.Load();
-            if (ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, MBComponet))
+            if (ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, MBComponet.m_itemData))
                 MBComponet.m_nview.Destroy();
             MBComponet.Save();
         }

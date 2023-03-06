@@ -7,7 +7,6 @@ namespace TomekDexValheimMod.Controllers
     public class CraftingStationController : ContainerQuickDistributionObject<CraftingStation>
     {
         private Dictionary<Recipe, Crafting> recipes;
-        private readonly Dictionary<Recipe, List<Dictionary<string, int>>> recipesResourcesNeeded = new Dictionary<Recipe, List<Dictionary<string, int>>>();
         private int recipeCount;
         private int level;
         public override void UpdateOnTime()
@@ -30,7 +29,7 @@ namespace TomekDexValheimMod.Controllers
             {
                 foreach (var item in recipe.Key.m_resources)
                 {
-                    Debug.Log($"{item.m_resItem.name} {item.m_extraAmountOnlyOneIngredient}" );
+                    Debug.Log($"{item.m_resItem.name} {item.m_extraAmountOnlyOneIngredient}");
                 }
 
                 string log = $"{recipe.Key.name} {recipe.Key.m_item.name}, {recipe.Value.Limit}, {recipe.Value.Quantity}";
@@ -99,19 +98,19 @@ namespace TomekDexValheimMod.Controllers
             }
             bool product = false;
             foreach (Dictionary<string, (int amount, int extraAmount)> resources in options.RecipesResourcesNeeded[recipe])
-                product = Product(resources, recipe, options.Limit, options.Quantity) || product;
+                product = Product(resources, recipe, options) || product;
             return product;
         }
 
-        private bool Product(Dictionary<string, (int amount, int extraAmount)> resources, Recipe recipe, int limit, int quantity)
+        private bool Product(Dictionary<string, (int amount, int extraAmount)> resources, Recipe recipe, Crafting options)
         {
-            if (limit > 0)
+            if (options.Limit > 0)
             {
                 int count = ContainerQuickAccess.CountItems(MBComponet.transform.position, WorkingArea, recipe.m_item);
-                if (limit + recipe.m_amount < count)
+                if (options.Limit + recipe.m_amount < count)
                 {
                     if (ContainerQuickDistributionConfig.Logs)
-                        Debug.Log($"Limit {recipe.m_item.m_itemData.m_shared.m_name} {count}/{limit}");
+                        Debug.Log($"Limit {recipe.m_item.m_itemData.m_shared.m_name} {count}/{options.Limit}");
                     return false;
                 }
             }
@@ -120,6 +119,11 @@ namespace TomekDexValheimMod.Controllers
             {
                 ItemDrop item = ItemsHelper.GetItemDropBySharedNameOrName(resource.Key);
                 int countResource = ContainerQuickAccess.CountItems(MBComponet.transform.position, WorkingArea, item);
+                if (options.MatsLimit.TryGetValue(resource.Key, out int matsLimit))
+                {
+                    Debug.LogError($"limit {resource.Key}, {matsLimit}/{countResource}");
+                    countResource -= matsLimit;
+                }
                 int posibleAmmound = countResource / resource.Value.amount;
                 if (posibleAmmound == 0)
                     return false;
@@ -128,22 +132,23 @@ namespace TomekDexValheimMod.Controllers
             }
             if (ammound == null)
                 return false;
-            if (limit > 0)
+            if (options.Limit > 0)
             {
                 int count = ContainerQuickAccess.CountItems(MBComponet.transform.position, WorkingArea, recipe.m_item);
-                int wanted = (limit - count) / recipe.m_amount;
+                int wanted = (options.Limit - count) / recipe.m_amount;
                 if (ammound > wanted)
                     ammound = wanted;
             }
             if (ammound == 0)
                 return false;
-
             int stack = 0;
+            if (ammound < 1)
+                return false;
             foreach (KeyValuePair<string, (int amount, int extraAmount)> resource in resources)
             {
                 ItemDrop item = ItemsHelper.GetItemDropBySharedNameOrName(resource.Key);
                 item = Instantiate(item);
-                int toRemove = (ammound.Value * resource.Value.amount);
+                int toRemove = ammound.Value * resource.Value.amount;
                 for (int i = 1; i <= item.m_itemData.m_shared.m_maxQuality; i++)
                 {
                     item.m_itemData.m_quality = i;
@@ -156,11 +161,10 @@ namespace TomekDexValheimMod.Controllers
                     Debug.LogError($"Removed the wrong amount of material {resource.Key} {toRemove}/{ammound.Value * resource.Value.amount}");
             }
             ItemDrop itemDrop = Instantiate(recipe.m_item);
-
             itemDrop.m_itemData.m_stack = recipe.m_requireOnlyOneIngredient ? stack : recipe.m_amount * ammound.Value;
-            itemDrop.m_itemData.m_quality = quantity;
+            itemDrop.m_itemData.m_quality = options.Quantity;
             itemDrop.m_itemData.m_durability = itemDrop.m_itemData.GetMaxDurability();
-            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, itemDrop))
+            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, itemDrop.m_itemData))
                 ItemsHelper.Drop(itemDrop, MBComponet.transform.position);
             return true;
         }

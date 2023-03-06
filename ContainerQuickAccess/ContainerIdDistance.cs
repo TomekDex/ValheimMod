@@ -22,10 +22,13 @@ namespace TomekDexValheimMod
         public Container Container { get; }
         public int Id { get; }
         public float Distance { get; }
+        public ContainerExtension Extension { get; }
 
-        public ContainerIdDistance(Container container, float distance = default)
+        public ContainerIdDistance(Container container, float distance = default, bool toDelete = false)
         {
             Container = container;
+            if (!toDelete)
+                Extension = container.gameObject.GetComponent<ContainerExtension>() ?? container.gameObject.AddComponent<ContainerExtension>();
             Id = container.GetInstanceID();
             Distance = distance;
             LastPosition = new Vector3(container.transform.position.x, container.transform.position.y, container.transform.position.z);
@@ -33,15 +36,14 @@ namespace TomekDexValheimMod
 
         public override int GetHashCode()
         {
-            SortedSet<int> a = new SortedSet<int>();
-            return Id.GetHashCode();
+            return Container.GetHashCode();
         }
 
         public override bool Equals(object obj)
         {
             if (obj == null || GetType() != obj.GetType())
                 return false;
-            return Id.Equals(((ContainerIdDistance)obj).Id);
+            return Container.Equals(((ContainerIdDistance)obj).Container);
         }
     }
 }

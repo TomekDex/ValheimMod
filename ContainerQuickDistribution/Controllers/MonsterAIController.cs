@@ -52,7 +52,7 @@ namespace TomekDexValheimMod.Controllers
                 }
                 foreach (KeyValuePair<ItemDrop, int?> item in consumeItems)
                 {
-                    if (!ContainerQuickAccess.TryRemoveItem(contanier.Container.m_inventory, item.Key, 1).Any())
+                    if (!ContainerQuickAccess.TryRemoveItem(contanier.Container.m_inventory, item.Key.m_itemData, 1).Any())
                         continue;
                     MBComponet.m_onConsumedItem?.Invoke(MBComponet.m_consumeTarget);
                     (MBComponet.m_character as Humanoid).m_consumeItemEffects.Create(MBComponet.transform.position, Quaternion.identity);

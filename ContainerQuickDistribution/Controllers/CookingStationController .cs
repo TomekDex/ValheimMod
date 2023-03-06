@@ -84,7 +84,7 @@ namespace TomekDexValheimMod.Controllers
             cookingStation.m_doneEffect.Create(cookingStation.m_slots[slot].position, Quaternion.identity);
             ItemDrop itemNew = Instantiate(item);
             item.m_itemData.m_stack = 1;
-            if (!ContainerQuickAccess.TryAddItemNearbyContainers(cookingStation.transform.position, WorkingArea, itemNew))
+            if (!ContainerQuickAccess.TryAddItemNearbyContainers(cookingStation.transform.position, WorkingArea, itemNew.m_itemData))
             {
                 Vector3 position = new Vector3(cookingStation.transform.position.x + 1, cookingStation.transform.position.y, cookingStation.transform.position.z + 1);
                 Drop(itemNew, position);

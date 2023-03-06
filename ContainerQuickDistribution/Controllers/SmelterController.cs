@@ -63,7 +63,7 @@ namespace TomekDexValheimMod.Controllers
             __instance.m_produceEffects.Create(__instance.transform.position, __instance.transform.rotation);
             ItemDrop item = Instantiate(itemConversion.m_to.gameObject).GetComponent<ItemDrop>();
             item.m_itemData.m_stack = stack;
-            if (ContainerQuickAccess.TryAddItemNearbyContainers(__instance.transform.position, WorkingArea, item))
+            if (ContainerQuickAccess.TryAddItemNearbyContainers(__instance.transform.position, WorkingArea, item.m_itemData))
             {
                 __instance.m_produceEffects.Create(__instance.transform.position, __instance.transform.rotation);
                 __instance.m_nview.GetZDO().Set("SpawnAmount", 0);

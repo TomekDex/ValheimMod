@@ -4,7 +4,12 @@ using UnityEngine;
 
 namespace TomekDexValheimMod
 {
-    public abstract class ContainerQuickDistributionObject<T> : MonoBehaviour
+    public interface IUpdatedOnTime
+    {
+        void UpdateOnTime();
+    }
+
+    public abstract class ContainerQuickDistributionObject<T> : MonoBehaviour, IUpdatedOnTime
         where T : MonoBehaviour
     {
         public static bool On { get; set; }

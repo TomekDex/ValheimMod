@@ -33,7 +33,7 @@ namespace TomekDexValheimMod
                 Debug.Log(log);
             if (hitAreaConteners.Count == 0 || Player.m_localPlayer == null)
                 return;
-            if (Player.m_players.Any(a => a.IsTeleporting()))
+            if (Player.s_players.Any(a => a.IsTeleporting()))
                 return;
             if (ChcekTasks(fillCollidersTask, FillCollidersTask, clearCollidersTasks, 20))
             {

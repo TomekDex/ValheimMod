@@ -27,8 +27,8 @@ namespace TomekDexValheimMod
                 {
                     count++;
                     Queue.AddLast(element);
-                    dynamic a = element.mb.GetComponent(element.type);
-                    a.UpdateOnTime();
+                    Component component = element.mb.GetComponent(element.type);
+                    ((IUpdatedOnTime)component).UpdateOnTime();
                     if (Queue.Count <= count)
                         break;
                 }

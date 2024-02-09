@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace TomekDexValheimMod
 {
@@ -15,7 +16,7 @@ namespace TomekDexValheimMod
             Assembly assembly = Assembly.GetAssembly(typeof(ContainerQuickDistributionObject<>));
             foreach (Type type in assembly.GetTypes())
             {
-                if (type.BaseType.IsGenericType && type.BaseType?.GetGenericTypeDefinition() == typeof(ContainerQuickDistributionObject<>))
+                if (type.BaseType?.IsGenericType == true && type.BaseType?.GetGenericTypeDefinition() == typeof(ContainerQuickDistributionObject<>))
                 {
                     Type baseTypeGenericArgument = type.BaseType.GetGenericArguments()[0];
                     controllers[baseTypeGenericArgument] = type;
@@ -43,7 +44,7 @@ namespace TomekDexValheimMod
             return null;
         }
 
-        public static void Postfix(object[] __args, MethodBase __originalMethod, dynamic __instance, ZNetView ___m_nview)
+        public static void Postfix(object[] __args, MethodBase __originalMethod, MonoBehaviour __instance, ZNetView ___m_nview)
         {
             if (!ContainerQuickDistributionConfig.ConfigOn[__originalMethod.ReflectedType])
                 return;

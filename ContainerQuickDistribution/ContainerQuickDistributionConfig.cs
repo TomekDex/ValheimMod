@@ -17,7 +17,7 @@ namespace TomekDexValheimMod
         {
             Assembly assembly = Assembly.GetAssembly(typeof(ContainerQuickDistributionObject<>));
             foreach (Type type in assembly.GetTypes())
-                if (type.BaseType.IsGenericType && type.BaseType?.GetGenericTypeDefinition() == typeof(ContainerQuickDistributionObject<>))
+                if (type.BaseType?.IsGenericType == true && type.BaseType?.GetGenericTypeDefinition() == typeof(ContainerQuickDistributionObject<>))
                 {
                     Type baseTypeGenericArgument = type.BaseType.GetGenericArguments()[0];
                     ConfigOn[baseTypeGenericArgument] = config.Bind(baseTypeGenericArgument.Name, "On", true, "Runs sections").Value;

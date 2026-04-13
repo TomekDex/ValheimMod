@@ -46,16 +46,21 @@ namespace TomekDexValheimMod
         #region TryRemoveItem
         public static int TryRemoveItemRegistertNearbyContainer(Vector3 position, int workingArea, ItemDrop itemDrop, int ammound)
         {
+            return TryRemoveItemRegistertNearbyContainer(position, workingArea, itemDrop.m_itemData, ammound);
+        }
+
+        public static int TryRemoveItemRegistertNearbyContainer(Vector3 position, int workingArea, ItemDrop.ItemData item, int ammound)
+        {
             if (ContainerQuickAccessConfig.Logs)
-                Debug.Log($"TryRemoveItemNearbyContainer {position} {workingArea} {itemDrop.name} {ammound}");
+                Debug.Log($"TryRemoveItemNearbyContainer {position} {workingArea} {item.m_shared.m_name} {ammound}");
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
             int removed = 0;
-            foreach (ContainerIdDistance cId in GetRegistertNearbyContainerWithItem(position, workingArea, itemDrop))
+            foreach (ContainerIdDistance cId in GetRegistertNearbyContainerWithItem(position, workingArea, item))
             {
                 if (cId.Extension.Mode == SortMode.Lock)
                     continue;
-                foreach (ItemDrop.ItemData item in TryRemoveItem(cId.Container.m_inventory, itemDrop.m_itemData, ammound - removed))
-                    removed += item.m_stack;
+                foreach (ItemDrop.ItemData itemRemoved in TryRemoveItem(cId.Container.m_inventory, item, ammound - removed))
+                    removed += itemRemoved.m_stack;
                 if (ammound - removed == 0)
                     break;
             }
@@ -82,10 +87,11 @@ namespace TomekDexValheimMod
                     else
                     {
                         itemIn.m_stack -= amount;
-                        ItemDrop newItem = Object.Instantiate(ItemsHelper.GetItemDropBySharedNameOrName(item.m_shared.m_name));
-                        newItem.m_itemData = item.Clone();
-                        newItem.m_itemData.m_stack = amount;
-                        yield return newItem.m_itemData;
+                        // Create an ItemData clone from the registered prefab (no GameObject Instantiate)
+                        ItemDrop prefab = ItemsHelper.GetItemDropBySharedNameOrName(item.m_shared.m_name);
+                        ItemDrop.ItemData newData = prefab != null ? prefab.m_itemData.Clone() : item.Clone();
+                        newData.m_stack = amount;
+                        yield return newData;
                         break;
                     }
                 }
@@ -132,13 +138,14 @@ namespace TomekDexValheimMod
                 return true;
             while (item.m_stack > item.m_shared.m_maxStackSize)
             {
-                ItemDrop itemNew = Object.Instantiate(ItemsHelper.GetItemDropBySharedNameOrName(item.m_shared.m_name));
-                itemNew.m_itemData = item.Clone();
-                itemNew.m_itemData.m_stack = itemNew.m_itemData.m_shared.m_maxStackSize;
-                item.m_stack -= itemNew.m_itemData.m_shared.m_maxStackSize;
-                if (!inventory.AddItem(itemNew.m_itemData))
+                // Create ItemData clone from prefab instead of instantiating a GameObject
+                ItemDrop prefab = ItemsHelper.GetItemDropBySharedNameOrName(item.m_shared.m_name);
+                ItemDrop.ItemData data = prefab != null ? prefab.m_itemData.Clone() : item.Clone();
+                data.m_stack = data.m_shared.m_maxStackSize;
+                item.m_stack -= data.m_shared.m_maxStackSize;
+                if (!inventory.AddItem(data))
                 {
-                    item.m_stack += itemNew.m_itemData.m_stack;
+                    item.m_stack += data.m_stack;
                     return false;
                 }
             }
@@ -220,11 +227,11 @@ namespace TomekDexValheimMod
                         yield return cId;
         }
 
-        private static IEnumerable<ContainerIdDistance> GetRegistertNearbyContainerWithItem(Vector3 position, int workingArea, ItemDrop item)
+        private static IEnumerable<ContainerIdDistance> GetRegistertNearbyContainerWithItem(Vector3 position, int workingArea, ItemDrop.ItemData itemData)
         {
-            if (!itemsIdCount.ContainsKey(item.m_itemData.m_shared.m_name))
+            if (!itemsIdCount.ContainsKey(itemData.m_shared.m_name))
                 yield break;
-            Dictionary<ContainerIdDistance, int> idCount = itemsIdCount[item.m_itemData.m_shared.m_name];
+            Dictionary<ContainerIdDistance, int> idCount = itemsIdCount[itemData.m_shared.m_name];
             foreach (ContainerIdDistance cId in GetRegistertNearbyContainer(position, workingArea))
                 if (idCount.ContainsKey(cId))
                     yield return cId;

@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
+using TomekDexValheimModHelper;
 using UnityEngine;
 using static CookingStation;
 
@@ -82,30 +83,18 @@ namespace TomekDexValheimMod.Controllers
         private static void GetItem(CookingStation cookingStation, ItemDrop item, int slot)
         {
             cookingStation.m_doneEffect.Create(cookingStation.m_slots[slot].position, Quaternion.identity);
-            ItemDrop itemNew = Instantiate(item);
-            item.m_itemData.m_stack = 1;
-            if (!ContainerQuickAccess.TryAddItemNearbyContainers(cookingStation.transform.position, WorkingArea, itemNew.m_itemData))
+            CookingStationController controller = cookingStation.gameObject.GetComponent<CookingStationController>();
+            ItemDrop.ItemData itemData = controller?.CreateItemData(item, 1);
+            if (itemData == null)
+                return;
+            if (!ContainerQuickAccess.TryAddItemNearbyContainers(cookingStation.transform.position, WorkingArea, itemData))
             {
                 Vector3 position = new Vector3(cookingStation.transform.position.x + 1, cookingStation.transform.position.y, cookingStation.transform.position.z + 1);
-                Drop(itemNew, position);
+                ItemsHelper.Drop(item, 1, position);
             }
             if (produtionInProgres[cookingStation].ContainsKey(item.name))
                 produtionInProgres[cookingStation][item.name]--;
             cookingStation.SetSlot(slot, "", 0f, Status.NotDone);
-        }
-
-        private static void Drop(ItemDrop item, Vector3 position)
-        {
-            for (int i = 0; i < item.m_itemData.m_stack;)
-            {
-                ItemDrop itemNew = Instantiate(item);
-                if (item.m_itemData.m_shared.m_maxStackSize < item.m_itemData.m_stack)
-                    itemNew.m_itemData.m_stack = item.m_itemData.m_shared.m_maxStackSize;
-                else
-                    itemNew.m_itemData.m_stack = item.m_itemData.m_stack;
-                i += itemNew.m_itemData.m_stack;
-                Instantiate(itemNew, position, Quaternion.identity);
-            }
         }
 
         public override void UpdateOnTime()

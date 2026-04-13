@@ -56,11 +56,16 @@ namespace TomekDexValheimMod.Controllers
             CharacterDrop characterDrop = MBComponet.m_character.GetComponent<CharacterDrop>();
             foreach (KeyValuePair<GameObject, int> items in characterDrop.GenerateDropList())
             {
-                GameObject prefab = Instantiate(items.Key);
-                ItemDrop item = prefab.GetComponent<ItemDrop>();
-                item.m_itemData.m_stack = items.Value;
-                if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item.m_itemData))
-                    ItemsHelper.Drop(item, MBComponet.transform.position);
+                GameObject prefab = items.Key;
+                ItemDrop prefabItem = prefab.GetComponent<ItemDrop>();
+                ItemDrop.ItemData itemData = CreateItemData(prefabItem, items.Value);
+                if (itemData == null)
+                    continue;
+                if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, itemData))
+                {
+                    // drop directly from prefab without creating a temporary instance
+                    ItemsHelper.Drop(prefabItem, items.Value, MBComponet.transform.position);
+                }
                 MBComponet.m_character.m_nview.Destroy();
             }
         }

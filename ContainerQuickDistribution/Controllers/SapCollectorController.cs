@@ -10,17 +10,18 @@ namespace TomekDexValheimMod.Controllers
             if (level <= 0)
                 return;
             MBComponet.m_spawnEffect.Create(MBComponet.m_spawnPoint.position, Quaternion.identity);
-            ItemDrop item = Instantiate(MBComponet.m_spawnItem);
-            item.m_itemData.m_stack = level;
-            if (ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item.m_itemData))
+            ItemDrop.ItemData itemData = CreateItemData(MBComponet.m_spawnItem, level);
+            if (itemData == null)
+                return;
+            if (ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, itemData))
             {
                 MBComponet.ResetLevel();
                 MBComponet.m_spawnEffect.Create(MBComponet.transform.position, Quaternion.identity);
             }
             else
             {
-                MBComponet.m_nview.GetZDO().Set("level", item.m_itemData.m_stack);
-                if (item.m_itemData.m_stack != level)
+                MBComponet.m_nview.GetZDO().Set("level", itemData.m_stack);
+                if (itemData.m_stack != level)
                     MBComponet.m_spawnEffect.Create(MBComponet.transform.position, Quaternion.identity);
             }
             MBComponet.UpdateEffects();

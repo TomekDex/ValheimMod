@@ -15,25 +15,35 @@
                 if (MBComponet.m_floating && MBComponet.m_floating.IsInTar())
                     return;
             }
-            ItemDrop item = Instantiate(MBComponet.m_itemPrefab).GetComponent<ItemDrop>();
-            item.m_itemData.m_stack = MBComponet.m_amount;
-            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item.m_itemData))
+            // create ItemData clone from prefab without instantiating
+            ItemDrop.ItemData itemData = CreateItemData(MBComponet.m_itemPrefab, MBComponet.m_amount);
+            if (itemData == null)
+                return;
+            int originalAmount = itemData.m_stack;
+            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, itemData))
             {
-                ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, item, MBComponet.m_amount - item.m_itemData.m_stack);
+                int added = originalAmount - itemData.m_stack;
+                if (added > 0)
+                {
+                    // rollback partially added items
+                    ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, itemData, added);
+                }
                 return;
             }
             if (!MBComponet.m_extraDrops.IsEmpty())
             {
+                int offsetBase = 1;
                 foreach (ItemDrop.ItemData dropListItem in MBComponet.m_extraDrops.GetDropListItems())
                 {
-                    item = Instantiate(dropListItem.m_dropPrefab).GetComponent<ItemDrop>();
-                    item.m_itemData.m_stack = dropListItem.m_stack;
-                    int offset = 1;
-                    if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item.m_itemData))
-                        MBComponet.Drop(dropListItem.m_dropPrefab, offset++, item.m_itemData.m_stack);
+                    ItemDrop.ItemData extraData = CreateItemData(dropListItem.m_dropPrefab, dropListItem.m_stack);
+                    if (extraData == null)
+                        continue;
+                    int offset = offsetBase;
+                    if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, extraData))
+                        MBComponet.Drop(dropListItem.m_dropPrefab, offset++, extraData.m_stack);
                 }
             }
-            MBComponet.m_nview.InvokeRPC(ZNetView.Everybody, "SetPicked", true);
+            MBComponet.m_nview.InvokeRPC(ZNetView.Everybody, "RPC_SetPicked", true);
         }
     }
 }

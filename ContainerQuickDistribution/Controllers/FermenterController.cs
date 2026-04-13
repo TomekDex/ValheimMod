@@ -23,12 +23,14 @@ namespace TomekDexValheimMod.Controllers
             ItemConversion itemConversion = MBComponet.GetItemConversion(MBComponet.GetContent());
             if (itemConversion == null)
                 return;
-            ItemDrop item = Instantiate(itemConversion.m_to);
-            item.m_itemData.m_stack = itemConversion.m_producedItems;
-            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, item.m_itemData))
+            ItemDrop.ItemData itemData = CreateItemData(itemConversion.m_to, itemConversion.m_producedItems);
+            if (itemData == null)
+                return;
+            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, itemData))
             {
                 Vector3 position = MBComponet.m_outputPoint.position + Vector3.up * 0.3f;
-                ItemsHelper.Drop(item, position);
+                // drop directly from prefab without creating a temporary instance
+                ItemsHelper.Drop(itemConversion.m_to, itemConversion.m_producedItems, position);
             }
             MBComponet.m_tapEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
             MBComponet.m_nview.GetZDO().Set("Content", "");

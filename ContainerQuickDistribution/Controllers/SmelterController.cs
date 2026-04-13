@@ -61,15 +61,18 @@ namespace TomekDexValheimMod.Controllers
                 return true;
             int stack = __instance.m_nview.GetZDO().GetInt("SpawnAmount") + 1;
             __instance.m_produceEffects.Create(__instance.transform.position, __instance.transform.rotation);
-            ItemDrop item = Instantiate(itemConversion.m_to.gameObject).GetComponent<ItemDrop>();
-            item.m_itemData.m_stack = stack;
-            if (ContainerQuickAccess.TryAddItemNearbyContainers(__instance.transform.position, WorkingArea, item.m_itemData))
+            // create ItemData from prefab without instantiating
+            SmelterController controller = __instance.gameObject.GetComponent<SmelterController>();
+            ItemDrop.ItemData itemData = controller?.CreateItemData(itemConversion.m_to, stack);
+            if (itemData == null)
+                return true;
+            if (ContainerQuickAccess.TryAddItemNearbyContainers(__instance.transform.position, WorkingArea, itemData))
             {
                 __instance.m_produceEffects.Create(__instance.transform.position, __instance.transform.rotation);
                 __instance.m_nview.GetZDO().Set("SpawnAmount", 0);
                 return false;
             }
-            __instance.m_nview.GetZDO().Set("SpawnAmount", item.m_itemData.m_stack - 1);
+            __instance.m_nview.GetZDO().Set("SpawnAmount", itemData.m_stack - 1);
             return true;
         }
 

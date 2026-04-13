@@ -26,11 +26,11 @@ namespace TomekDexValheimMod
             UseShip = Config.Bind("ContainerQuickAccessConfig", "UseShip", true, "").Value;
             UseObliterator = Config.Bind("ContainerQuickAccessConfig", "UseObliterator", true, "").Value;
             UseCheckAccess = Config.Bind("ContainerQuickAccessConfig", "UseCheckAccess", false, "").Value;
-            DefaultSortMode = (SortMode)Enum.Parse(typeof(SortMode), Config.Bind("Access", "DefaultSortMode", "None", "Shows and hides extra text on chests\r\nNone, Free, Restrictive, Lock").Value);
+            DefaultSortMode = (SortMode)Enum.Parse(typeof(SortMode), Config.Bind("Access", "DefaultSortMode", "Lock", "Shows and hides extra text on chests\r\nNone, Free, Restrictive, Lock").Value);
             HideText = Config.Bind("Access", "HideText", false, "Shows and hides extra text on chests").Value;
-            BlockChange = Config.Bind("Access", "BlockChange", false, "Blockade of changing settings so that you do not change anything by accident.").Value;
+            BlockChange = Config.Bind("Access", "BlockChange", true, "Blockade of changing settings so that you do not change anything by accident.").Value;
             WorkingArea = Config.Bind("Sort", "WorkingArea", 50, "Sort range").Value;
-            UseAutoClear = Config.Bind("Sort", "UseAutoClear", false, "It automatically calls the clear command before open container\r\nIf true DefaultSortMode should be Lock").Value;
+            UseAutoClear = Config.Bind("Sort", "UseAutoClear", true, "It automatically calls the clear command before open container\r\nIf true DefaultSortMode should be Lock").Value;
             Logs = Config.Bind("Debug", "Logs", false, "").Value;
             if (UseCart || UseShip)
                 InvokeRepeating("RefreshContainerPosition", 30, 30);

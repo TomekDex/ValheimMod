@@ -26,16 +26,41 @@ namespace TomekDexValheimModHelper
 
         public static void Drop(ItemDrop item, Vector3 position)
         {
-            for (int i = 0; i < item.m_itemData.m_stack;)
+            if (item == null)
+                return;
+            Drop(item.gameObject, item.m_itemData.m_stack, position);
+        }
+
+        public static void Drop(GameObject prefab, int stack, Vector3 position)
+        {
+            if (prefab == null || stack <= 0)
+                return;
+            ItemDrop prefabItem = prefab.GetComponent<ItemDrop>();
+            if (prefabItem == null)
+                return;
+            int remaining = stack;
+            while (remaining > 0)
             {
-                ItemDrop itemNew = Object.Instantiate(item);
-                if (item.m_itemData.m_shared.m_maxStackSize < item.m_itemData.m_stack)
-                    itemNew.m_itemData.m_stack = item.m_itemData.m_shared.m_maxStackSize;
-                else
-                    itemNew.m_itemData.m_stack = item.m_itemData.m_stack;
-                i += itemNew.m_itemData.m_stack;
-                Object.Instantiate(itemNew, position, Quaternion.identity);
+                int currentStack = remaining;
+                if (prefabItem.m_itemData.m_shared.m_maxStackSize < currentStack)
+                    currentStack = prefabItem.m_itemData.m_shared.m_maxStackSize;
+
+                GameObject go = Object.Instantiate(prefab, position, Quaternion.identity);
+                ItemDrop itemNew = go.GetComponent<ItemDrop>();
+                if (itemNew != null)
+                {
+                    itemNew.m_itemData.m_stack = currentStack;
+                }
+
+                remaining -= currentStack;
             }
+        }
+
+        public static void Drop(ItemDrop prefabItem, int stack, Vector3 position)
+        {
+            if (prefabItem == null)
+                return;
+            Drop(prefabItem.gameObject, stack, position);
         }
     }
 }

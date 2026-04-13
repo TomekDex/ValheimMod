@@ -71,6 +71,37 @@ namespace TomekDexValheimMod
 
         public abstract void UpdateOnTime();
 
+        // Helper to create ItemData from a prefab without instantiating the prefab in the scene.
+        public ItemDrop.ItemData CreateItemData(GameObject prefab, int stack)
+        {
+            if (prefab == null)
+            {
+                ZLog.Log("No prefab provided to CreateItemData");
+                return null;
+            }
+            ItemDrop prefabItem = prefab.GetComponent<ItemDrop>();
+            if (prefabItem == null)
+            {
+                ZLog.Log($"Prefab does not contain ItemDrop: {prefab.name}");
+                return null;
+            }
+            ItemDrop.ItemData data = prefabItem.m_itemData.Clone();
+            data.m_stack = stack;
+            return data;
+        }
+
+        public ItemDrop.ItemData CreateItemData(ItemDrop prefabItem, int stack)
+        {
+            if (prefabItem == null)
+            {
+                ZLog.Log("No item prefab provided to CreateItemData");
+                return null;
+            }
+            ItemDrop.ItemData data = prefabItem.m_itemData.Clone();
+            data.m_stack = stack;
+            return data;
+        }
+
         private void OnDestroy()
         {
             ContainerQuickDistributionQueue.Queue.Remove(element);

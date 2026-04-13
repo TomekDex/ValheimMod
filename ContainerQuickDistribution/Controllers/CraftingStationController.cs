@@ -146,26 +146,37 @@ namespace TomekDexValheimMod.Controllers
                 return false;
             foreach (KeyValuePair<string, (int amount, int extraAmount)> resource in resources)
             {
-                ItemDrop item = ItemsHelper.GetItemDropBySharedNameOrName(resource.Key);
-                item = Instantiate(item);
-                int toRemove = ammound.Value * resource.Value.amount;
-                for (int i = 1; i <= item.m_itemData.m_shared.m_maxQuality; i++)
+                ItemDrop prefab = ItemsHelper.GetItemDropBySharedNameOrName(resource.Key);
+                if (prefab == null)
                 {
-                    item.m_itemData.m_quality = i;
-                    int removed = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, item, toRemove);
+                    Debug.LogError($"Missing prefab for resource {resource.Key}");
+                    return false;
+                }
+                int toRemove = ammound.Value * resource.Value.amount;
+                int maxQuality = prefab.m_itemData.m_shared.m_maxQuality;
+                for (int i = 1; i <= maxQuality; i++)
+                {
+                    // create ItemData clone for this quality without instantiating the prefab in scene
+                    ItemDrop.ItemData data = CreateItemData(prefab, 1);
+                    if (data == null)
+                        continue;
+                    data.m_quality = i;
+                    int removed = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, data, toRemove);
                     if (removed > 0 && recipe.m_requireOnlyOneIngredient)
-                        stack += (recipe.m_amount + (int)Mathf.Ceil((item.m_itemData.m_quality - 1) * recipe.m_amount * recipe.m_qualityResultAmountMultiplier) + resource.Value.extraAmount) * removed / resource.Value.amount;
+                        stack += (recipe.m_amount + (int)Mathf.Ceil((data.m_quality - 1) * recipe.m_amount * recipe.m_qualityResultAmountMultiplier) + resource.Value.extraAmount) * removed / resource.Value.amount;
                     toRemove -= removed;
                 }
                 if (toRemove != 0)
                     Debug.LogError($"Removed the wrong amount of material {resource.Key} {toRemove}/{ammound.Value * resource.Value.amount}");
             }
-            ItemDrop itemDrop = Instantiate(recipe.m_item);
-            itemDrop.m_itemData.m_stack = recipe.m_requireOnlyOneIngredient ? stack : recipe.m_amount * ammound.Value;
-            itemDrop.m_itemData.m_quality = options.Quantity;
-            itemDrop.m_itemData.m_durability = itemDrop.m_itemData.GetMaxDurability();
-            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, itemDrop.m_itemData))
-                ItemsHelper.Drop(itemDrop, MBComponet.transform.position);
+            int craftedStack = recipe.m_requireOnlyOneIngredient ? stack : recipe.m_amount * ammound.Value;
+            ItemDrop.ItemData craftedData = CreateItemData(recipe.m_item, craftedStack);
+            if (craftedData == null)
+                return true;
+            craftedData.m_quality = options.Quantity;
+            craftedData.m_durability = craftedData.GetMaxDurability();
+            if (!ContainerQuickAccess.TryAddItemNearbyContainers(MBComponet.transform.position, WorkingArea, craftedData))
+                ItemsHelper.Drop(recipe.m_item, craftedData.m_stack, MBComponet.transform.position);
             return true;
         }
 

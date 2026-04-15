@@ -71,7 +71,6 @@ namespace TomekDexValheimMod
 
         public abstract void UpdateOnTime();
 
-        // Helper to create ItemData from a prefab without instantiating the prefab in the scene.
         public ItemDrop.ItemData CreateItemData(GameObject prefab, int stack)
         {
             if (prefab == null)
@@ -79,14 +78,37 @@ namespace TomekDexValheimMod
                 ZLog.Log("No prefab provided to CreateItemData");
                 return null;
             }
-            ItemDrop prefabItem = prefab.GetComponent<ItemDrop>();
-            if (prefabItem == null)
+
+            ItemDrop itemDropPrefab = prefab.GetComponent<ItemDrop>();
+            if (itemDropPrefab == null)
             {
-                ZLog.Log($"Prefab does not contain ItemDrop: {prefab.name}");
+                ZLog.Log($"Prefab {prefab.name} has no ItemDrop");
                 return null;
             }
-            ItemDrop.ItemData data = prefabItem.m_itemData.Clone();
-            data.m_stack = stack;
+            // 🔥 KLUCZOWA ZMIANA — zamiast Clone()
+            ZNetView.m_forceDisableInit = true;
+            GameObject go = UnityEngine.Object.Instantiate(prefab);
+            ZNetView.m_forceDisableInit = false;
+
+            ItemDrop itemDrop = go.GetComponent<ItemDrop>();
+            if (itemDrop == null)
+            {
+                Destroy(go);
+                return null;
+            }
+
+            ItemDrop.ItemData data = itemDrop.m_itemData;
+
+            // ustaw stack
+            data.m_stack = Mathf.Min(stack, data.m_shared.m_maxStackSize);
+
+            // 🔥 bardzo ważne rzeczy dla stabilności
+            data.m_durability = data.GetMaxDurability();
+            data.m_dropPrefab = prefab;
+
+            // 🧹 usuwamy tymczasowy obiekt ze świata
+            Destroy(go);
+
             return data;
         }
 
@@ -97,9 +119,8 @@ namespace TomekDexValheimMod
                 ZLog.Log("No item prefab provided to CreateItemData");
                 return null;
             }
-            ItemDrop.ItemData data = prefabItem.m_itemData.Clone();
-            data.m_stack = stack;
-            return data;
+
+            return CreateItemData(prefabItem.gameObject, stack);
         }
 
         private void OnDestroy()

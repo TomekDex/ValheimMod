@@ -397,12 +397,23 @@ namespace TomekDexValheimMod
 
         private static void RemoveItemCount(ContainerIdDistance cId)
         {
-            foreach (KeyValuePair<string, int> item in idItemsCount[cId])
+            // Defensive: the container key may have been removed already (events can fire after unregister),
+            // so use TryGetValue and operate on a copy to avoid KeyNotFoundException or collection modification issues.
+            if (!idItemsCount.TryGetValue(cId, out Dictionary<string, int> itemsForContainer) || itemsForContainer == null)
+                return;
+
+            foreach (KeyValuePair<string, int> item in itemsForContainer.ToList())
             {
-                itemsIdCount[item.Key].Remove(cId);
-                if (!itemsIdCount[item.Key].Any())
-                    itemsIdCount.Remove(item.Key);
+                if (itemsIdCount.TryGetValue(item.Key, out Dictionary<ContainerIdDistance, int> idCountDict))
+                {
+                    idCountDict.Remove(cId);
+                    if (!idCountDict.Any())
+                        itemsIdCount.Remove(item.Key);
+                }
             }
+
+            // Remove the container entry from idItemsCount as we've cleared its references
+            idItemsCount.Remove(cId);
         }
         #endregion Management Container
 

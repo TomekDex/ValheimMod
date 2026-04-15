@@ -116,10 +116,13 @@ namespace TomekDexValheimMod.Controllers
             if (fuel >= MBComponet.m_maxFuel)
                 return;
             int removed = ContainerQuickAccess.TryRemoveItemRegistertNearbyContainer(MBComponet.transform.position, WorkingArea, MBComponet.m_fuelItem, MBComponet.m_maxFuel - fuel);
-            fuel += removed;
-            MBComponet.SetFuel(fuel);
-            MBComponet.m_fuelAddedEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
-            MBComponet.UpdateState();
+            if (removed > 0)
+            {
+                fuel += removed;
+                MBComponet.SetFuel(fuel);
+                MBComponet.m_fuelAddedEffects.Create(MBComponet.transform.position, MBComponet.transform.rotation);
+                MBComponet.UpdateState();
+            }
         }
 
         private bool SkipAdd(ItemConversion conversion)
